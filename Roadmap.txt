@@ -1,0 +1,8 @@
+1. Afficher les blocks possibles à coté de la map -Karel
+2. liste tous les blocks possibles -Karel
+3. Listes de tous les blocks associés à chaque map -Amandine
+4. faire en sorte que l'utilisateur puisse choisir un block et puisse choisir les coordonnées -Amandine
+5. vérifier si les coordonnées sont valides -Amandine
+	6. Si elles ne sont pas valides, le joueur perd un point de vie -Amandine
+	7. Si elles sont valides, on place le block à l'endroit et on vérifie si ça complète une ligne -Karel
+		8. Si ça complète une ligne, on reinitialise la ligne, et on rajoute les points qui correspondent -Karel
