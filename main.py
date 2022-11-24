@@ -25,10 +25,14 @@ def print_grid(map):
 	print('-' * (len(map[0]) + 2))
 	print(f"\033[{len(map)+2}A", f"\033[{len(map[0]) + 2}C", end='') #Move the cursor up len(map+2) lines, that it to the original position from which we start drawing the map.
 
+
 def print_blocks(blocks):
+	#print(" " * 5, "\033[s\b", "Choose the next block to place", end="\033[u\033[B") is another way of doing it with cursor save position reset position
 	print(" " * 5, "Choose the next block to place", end=f"\033[{len('Choose the next block to place')}D\033[B")
+
 	#print the three randomly chosen blocks (should their scale be changed? cuz there is one block in the diamond map that looks like really big)
 
+	counter = 0
 	for block in blocks:
 		print('-' * (len(block[0])+2), end=f"\033[{len(block[0])+2}D\033[B")
 		
@@ -44,21 +48,26 @@ def print_blocks(blocks):
 			print('|', end=f"\033[{len(line)+2}D\033[B")
 
 		print('-' * (len(block[0])+2), end=f"\033[{len(block[0])+2}D\033[B")		
+		
+		#be carefull even or odd number of len of block[0]and behaviour of //
+		counter += 1
+		print(' ' * ((len(block[0]))//2), counter, end=f"\033[{(len(block[0])+2)//2 +1}D")
 
-		print(f"\033[{len(block[0]) + 3}A\033[{len(block[0])+2}C", end='     ')
+		#might need to modify the 3 below (adding 1)
+		print(f"\033[{len(block) + 2}A\033[{len(block[0])+2}C", end='     ')
 
-	print(f"\033[80B") #put the cursor to the bottom of the terminal
+	print("\033[100B") #put the cursor to the bottom of the terminal
 
 
-block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]]]
+block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]]]
 map = read_grid("diamond.txt")
 game = True #boolean representing if the game is ongoing or not
 
 while game:
-	blocks = [block_list[0], block_list[1]]
+	blocks = [block_list[0], block_list[1], block_list[2]]
 	print_grid(map)
 	print_blocks(blocks)
-
+	print("Enter coordinates")
 	#The coordinates are invalid as long as for one cell, the sum of the block cell and the map cell is not equal to 3.
 
 
