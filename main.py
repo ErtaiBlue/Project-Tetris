@@ -60,33 +60,63 @@ def print_blocks(blocks):
 
 block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]]]
 map = read_grid("diamond.txt")
-game = True #boolean representing if the game is ongoing or not
+prompt = ">>> "
+block_selected = False #boolean representing whether a block is selected or not
+game = True #boolean representing whether the game is ongoing or not
 
 while game:
-	blocks = [block_list[0], block_list[1], block_list[2]]
+	random_blocks = [block_list[0], block_list[1], block_list[2]]
 	print_grid(map)
-	print_blocks(blocks)
-	user_input = input(">>> ")
+	print_blocks(random_blocks)
+
+	#Get user input
+	print("\033[2K", end='')
+	user_input = input(prompt)
 	print("\033[T", end='') #Scrolls up a line, eliminating the newline created by input
-	if user_input == "pause":
-		pass
-	elif user_input == "exit":
+	if prompt != ">>> ":
+		prompt = ">>> "
+
+	#Use user input
+		#We first check if the user entered a command
+		#Otherwise we check if he entered coordinates
+		#Otherwise we check if the user enter a number
+		#it's maybe better to put this whole thing in a function
+	if user_input == "Stop playing":
 		game = False
+	elif user_input == "pause":
+		prompt = "Game paused (type 'resume' to continue) >>> "
+		#put the game on pause
+	elif user_input == "save":
+		pass
+		#save the current state of the game in a file
+	elif user_input == "unselect":
+		block_selected = False
+	elif block_selected == True:
+		#check if the input can be converted to coordinates i, j, that is the input is of the form "i, j"
+		#if it can check if the coordinates are valid
+		#if it can't prompt user to enter a valid command or coordinates or unselect
+		"""
+		if valid_position(user_input):
+			pass
+			#place block at coordinates
+			block_selected = False
+		else:
+			prompt = "Enter valid coordinates or 'unselect' to unselect block >>> "
+		#The coordinates are invalid as long as for one cell, the sum of the block cell and the map cell is not equal to 3.
+		#if yes, place block
+		"""
 	else:
 		try:
 			user_input = int(user_input)
-			if user_input == 1:
-				pass
-			elif user_input == 2:
-				pass
-			elif user_input == 3:
-				pass
-			else:
-				pass
 		except ValueError:
-			pass
+			prompt = "Enter the number of a block or a valid command >>> "
+		else:
+			if user_input > 0 and user_input <= len(random_blocks):
+				block_selected = True
+				prompt = "Enter the coordinates to place the block >>> "
+			else:
+				prompt = "Enter a valid block number >>> "
 
-	print(f"\033[{len(map) + 2}A", end="")
-	#The coordinates are invalid as long as for one cell, the sum of the block cell and the map cell is not equal to 3.
+	print(f"\033[{len(map) + 2}A", end="") #put the cursor back to the top left corner of screen (where we start drawing the map)
 
 print("\033[100B")
