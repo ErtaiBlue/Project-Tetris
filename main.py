@@ -53,10 +53,9 @@ def print_blocks(blocks):
 		counter += 1
 		print(' ' * ((len(block[0]))//2), counter, end=f"\033[{(len(block[0])+2)//2 +1}D")
 
-		#might need to modify the 3 below (adding 1)
 		print(f"\033[{len(block) + 2}A\033[{len(block[0])+2}C", end='     ')
 
-	print("\033[100B") #put the cursor to the bottom of the terminal
+	print("\033[100B\033[100D", end='') #put the cursor to the bottom of the terminal
 
 
 block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]]]
@@ -67,9 +66,27 @@ while game:
 	blocks = [block_list[0], block_list[1], block_list[2]]
 	print_grid(map)
 	print_blocks(blocks)
-	print("Enter coordinates")
+	user_input = input(">>> ")
+	print("\033[T", end='') #Scrolls up a line, eliminating the newline created by input
+	if user_input == "pause":
+		pass
+	elif user_input == "exit":
+		game = False
+	else:
+		try:
+			user_input = int(user_input)
+			if user_input == 1:
+				pass
+			elif user_input == 2:
+				pass
+			elif user_input == 3:
+				pass
+			else:
+				pass
+		except ValueError:
+			pass
+
+	print(f"\033[{len(map) + 2}A", end="")
 	#The coordinates are invalid as long as for one cell, the sum of the block cell and the map cell is not equal to 3.
 
-
-
-	game = False
+print("\033[100B")
