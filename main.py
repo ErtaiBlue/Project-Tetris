@@ -10,11 +10,13 @@ def read_grid(path):
 		return map
 
 def print_grid(map):
+	print('  ', "abcdefghijklmnopqrstuvwxyz"[:len(map[0])], ' ', sep='')
 	#print the map
-	print('-' * (len(map[0]) + 2) )
-	for line in map:
+	print(' ', '-' * (len(map[0]) + 2), sep='')
+	for row in range(len(map)):
+		print("ABCDEFGHIJKLMNOPQRSTUVXYZ"[row], end='')
 		print('|', end= '')
-		for cell in line:
+		for cell in map[row]:
 			if cell == 0:
 				print(' ', end='')
 			elif cell == 1:
@@ -22,8 +24,9 @@ def print_grid(map):
 			else:
 				print('▩', end='')
 		print('|')
-	print('-' * (len(map[0]) + 2))
-	print(f"\033[{len(map)+2}A", f"\033[{len(map[0]) + 2}C", end='') #Move the cursor up len(map+2) lines, that it to the original position from which we start drawing the map.
+	print(' ', '-' * (len(map[0]) + 2), sep='')
+
+	print(f"\033[{len(map)+3}A", f"\033[{len(map[0]) + 3}C", end='') #Move the cursor to the original position from which we start drawing the map.
 
 
 def print_blocks(blocks):
@@ -57,11 +60,38 @@ def print_blocks(blocks):
 
 	print("\033[100B\033[100D", end='') #put the cursor to the bottom of the terminal
 
+def is_input_coordinates(user_input, mapwidth, mapheight):
+	input = user_input.split(',')
+	columns = "abcdefghijklmnopqrstuvwxyz"
+	rows = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+	if len(input) != 2 or not(input[0] in columns[:mapwidth]) or not(input[1] in rows[:mapheight]):
+		return False
+	else:
+		return True
+
+def valid_position(grid, block, i, j):
+	for a in range(len(block)):
+		for b in range(len(block[0])):
+			if block[a][b] == 2 and (i-(len(block) -a -1) < 0 or j+b > len(grid[0])-1): #this means the block would be placed out of bounds
+				return False
+			if grid[i-(len(block) -a -1)][j+b] + block[a][b] == 2 or grid[i-(len(block) -a -1)][j+b] + block[a][b] == 4:
+				return False
+	return True
+
+def emplace_block(grid, block, i, j):
+	for a in range(len(block)):
+		for b in range(len(block[0])):
+			if block[a][b] == 2:
+				grid[i-(len(block) -a -1)][j+b] = block[a][b]
+			else:
+				grid[i-(len(block) -a -1)][j+b] = grid[i-(len(block) -a -1)][j+b] + block[a][b]
+
+
 
 block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]]]
 map = read_grid("diamond.txt")
 prompt = ">>> "
-block_selected = False #boolean representing whether a block is selected or not
+selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
 game = True #boolean representing whether the game is ongoing or not
 
 while game:
@@ -90,21 +120,22 @@ while game:
 		pass
 		#save the current state of the game in a file
 	elif user_input == "unselect":
-		block_selected = False
-	elif block_selected == True:
-		#check if the input can be converted to coordinates i, j, that is the input is of the form "i, j"
-		#if it can check if the coordinates are valid
-		#if it can't prompt user to enter a valid command or coordinates or unselect
-		"""
-		if valid_position(user_input):
-			pass
-			#place block at coordinates
-			block_selected = False
+		selected_block = None
+	elif selected_block != None:
+		if is_input_coordinates(user_input, len(map[0]), len(map)):
+			#Transform the coordinates from string to numbers	
+			coordinates = user_input.split(',')
+			coordinates[0], coordinates[1] = "ABCDEFGHIJKLMNOPQRSTUVXYZ".index(coordinates[1]), "abcdefghijklmnopqrstuvwxyz".index(coordinates[0])
+
+			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
+				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
+				selected_block = None
+			else:
+				prompt = "Invalid position to place the block! You loose a life >>> "
+				selected_block = None
 		else:
-			prompt = "Enter valid coordinates or 'unselect' to unselect block >>> "
-		#The coordinates are invalid as long as for one cell, the sum of the block cell and the map cell is not equal to 3.
-		#if yes, place block
-		"""
+			prompt = "Hello, i am annoying"
+			#prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
 	else:
 		try:
 			user_input = int(user_input)
@@ -112,11 +143,11 @@ while game:
 			prompt = "Enter the number of a block or a valid command >>> "
 		else:
 			if user_input > 0 and user_input <= len(random_blocks):
-				block_selected = True
-				prompt = "Enter the coordinates to place the block >>> "
+				selected_block = user_input-1
+				prompt = "Enter the coordinates to place the block (or type 'unselect' to unselect the block) >>> "
 			else:
 				prompt = "Enter a valid block number >>> "
 
-	print(f"\033[{len(map) + 2}A", end="") #put the cursor back to the top left corner of screen (where we start drawing the map)
+	print(f"\033[{len(map) + 3}A", end="") #put the cursor back to the top left corner of screen (where we start drawing the map)
 
 print("\033[100B")
