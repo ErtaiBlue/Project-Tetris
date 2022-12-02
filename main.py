@@ -74,7 +74,7 @@ def valid_position(grid, block, i, j):
 		for b in range(len(block[0])):
 			if block[a][b] == 2 and (i-(len(block) -a -1) < 0 or j+b > len(grid[0])-1): #this means the block would be placed out of bounds
 				return False
-			if grid[i-(len(block) -a -1)][j+b] + block[a][b] == 2 or grid[i-(len(block) -a -1)][j+b] + block[a][b] == 4:
+			if ( grid[i-(len(block) -a -1)][j+b] == 0 and block[a][b] == 2 ) or grid[i-(len(block) -a -1)][j+b] + block[a][b] == 4: #This means the block would be placed on an invalid square or an already filled square
 				return False
 	return True
 
@@ -85,6 +85,46 @@ def emplace_block(grid, block, i, j):
 				grid[i-(len(block) -a -1)][j+b] = block[a][b]
 			else:
 				grid[i-(len(block) -a -1)][j+b] = grid[i-(len(block) -a -1)][j+b] + block[a][b]
+
+
+def row_state(grid, i):
+	for cell in grid[i]:
+		if cell == 1:
+			return False
+	return True
+
+def col_state(grid, j):
+	for line in grid:
+		if line[j] == 1:
+			return False
+	return True
+
+def row_clear(grid, i):
+	previous_cell = None
+	first_square_of_line = None
+	last_square_of_line = None
+	for j in range(len(grid[i])):
+		if grid[i][j] == 2 and first_square_of_line == None:
+			first_square_of_line = j
+		else:
+			if previous_cell == 2:
+				last_square_of_line = j-1
+		previous_cell = grid[i][j]
+
+	for j in range(first_square_of_line, last_square_of_line+1):
+		grid[i][j] = 1
+
+
+def col_clear(grid, j):
+	pass
+
+def reset_full_lines_columns(grid):
+	for i in range(len(grid)-1, 0, -1):
+		while row_state(grid, i):
+			row_clear(grid, i)
+	for j in range(len(grid[0])):
+		if col_state(grid, j):
+			col_clear(grid, j)
 
 
 
@@ -129,6 +169,7 @@ while game:
 
 			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
 				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
+				reset_full_lines_columns(map)
 				selected_block = None
 			else:
 				prompt = "Invalid position to place the block! You loose a life >>> "
