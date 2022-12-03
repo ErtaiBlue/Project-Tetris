@@ -114,12 +114,23 @@ def row_clear(grid, i):
 	for j in range(first_square_of_line, last_square_of_line+1):
 		grid[i][j] = 1
 
+	#make the blocks on top fall down
+	for a in range(i, 0, -1):
+		for b in range(first_square_of_line, last_square_of_line+1):
+			if grid[a-1][b] == 1 or grid[a-1][b] == 2:
+				grid[a][b] = grid[a-1][b]
+			elif grid[a][b] != 0:
+				grid[a][b] = 1
+	for b in range(first_square_of_line, last_square_of_line+1):
+		if grid[0][b] == 2:
+			grid[0][b] = 1
+
 
 def col_clear(grid, j):
 	pass
 
 def reset_full_lines_columns(grid):
-	for i in range(len(grid)-1, 0, -1):
+	for i in range(len(grid)-1, -1, -1):
 		while row_state(grid, i):
 			row_clear(grid, i)
 	for j in range(len(grid[0])):
@@ -128,14 +139,14 @@ def reset_full_lines_columns(grid):
 
 
 
-block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]]]
+block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]], [[2]]]
 map = read_grid("diamond.txt")
 prompt = ">>> "
 selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
 game = True #boolean representing whether the game is ongoing or not
 
 while game:
-	random_blocks = [block_list[0], block_list[1], block_list[2]]
+	random_blocks = [block_list[0], block_list[1], block_list[2], block_list[3]]
 	print_grid(map)
 	print_blocks(random_blocks)
 
