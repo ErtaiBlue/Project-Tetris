@@ -1,4 +1,5 @@
 from time import sleep
+import sys
 
 def read_grid(path):
 	""" Returns a map matrix of integers representing the content of the cell. The map file has return characters at the end of each line,
@@ -28,11 +29,21 @@ def print_grid(map):
 
 	print(f"\033[{len(map)+3}A", f"\033[{len(map[0]) + 3}C", end='') #Move the cursor to the original position from which we start drawing the map.
 
+def print_score_lives(score, lives):
+	#print the score
+	print(" " * 5, end='')
+	print("#" * (9+len(str(score))+2), end=f"\033[{9+len(str(score))+2}D\033[B")
+	print("# Score: ", score, " #", sep='', end=f"\033[{9+len(str(score))+2}D\033[B")
+	print("#" * (9+len(str(score))+2),sep='', end='\033[2A')
+
+	#print the lives
+	print(" " * 5, end='')
+	print("#" * (9+3+2), end=f"\033[{9+3+2}D\033[B")
+	print("# Lives: ", "❤"*lives, " "*(3-lives), " #", sep='', end=f"\033[{9+3+2}D\033[B")
+	print("#" * (9+3+2), end='')
+	print(f"\033[{9+len(str(score))+2+5+9+3+2}D\033[3B", end='') #reposition the cursor
 
 def print_blocks(blocks):
-	#print(" " * 5, "\033[s\b", "Choose the next block to place", end="\033[u\033[B") is another way of doing it with cursor save position reset position
-	print(" " * 5, "Choose the next block to place", end=f"\033[{len('Choose the next block to place')}D\033[B")
-
 	#print the three randomly chosen blocks (should their scale be changed? cuz there is one block in the diamond map that looks like really big)
 
 	counter = 0
@@ -87,6 +98,27 @@ def emplace_block(grid, block, i, j):
 				grid[i-(len(block) -a -1)][j+b] = grid[i-(len(block) -a -1)][j+b] + block[a][b]
 
 
+def row_flash(grid, i, first_square_of_line, last_square_of_line):
+	print(f"\033[{2+len(map)-i}A\033[{2+first_square_of_line}C", end='')
+	for h in range(4):
+		if h%2 == 0:
+			print("\033[7m", end='')
+		else:
+			print("\033[0m", end='')
+		for j in range(first_square_of_line, last_square_of_line+1):
+			if grid[i][j] == 0:
+				print(' ', end='')
+			elif grid[i][j] == 1:
+				print('•', end='')
+			else:
+				print('▩', end='')
+		print(f"\033[{last_square_of_line-first_square_of_line}D", end='')
+		sleep(0.3)
+	print("\033[100D\033[100B", end='')
+
+def col_flash(grid, j):
+	pass
+
 def row_state(grid, i):
 	for cell in grid[i]:
 		if cell == 1:
@@ -100,6 +132,7 @@ def col_state(grid, j):
 	return True
 
 def row_clear(grid, i):
+	nb_cleared_blocks = 0
 	previous_cell = None
 	first_square_of_line = None
 	last_square_of_line = None
@@ -111,8 +144,10 @@ def row_clear(grid, i):
 				last_square_of_line = j-1
 		previous_cell = grid[i][j]
 
+	row_flash(grid, i, first_square_of_line, last_square_of_line)
 	for j in range(first_square_of_line, last_square_of_line+1):
 		grid[i][j] = 1
+	nb_cleared_blocks += last_square_of_line+1 - first_square_of_line
 
 	#make the blocks on top fall down
 	for a in range(i, 0, -1):
@@ -125,17 +160,26 @@ def row_clear(grid, i):
 		if grid[0][b] == 2:
 			grid[0][b] = 1
 
+	return nb_cleared_blocks
+
 
 def col_clear(grid, j):
-	pass
+	nb_cleared_blocks = 0
+	for line in grid:
+		if line[j] == 2:
+			line[j] = 1
+			nb_cleared_blocks += 1
+	return nb_cleared_blocks
 
-def reset_full_lines_columns(grid):
+
+def reset_full_lines_columns(grid, score):
 	for i in range(len(grid)-1, -1, -1):
 		while row_state(grid, i):
-			row_clear(grid, i)
+			score += row_clear(grid, i)
 	for j in range(len(grid[0])):
 		if col_state(grid, j):
-			col_clear(grid, j)
+			score += col_clear(grid, j)
+	return score
 
 
 
@@ -143,12 +187,20 @@ block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [
 map = read_grid("diamond.txt")
 prompt = ">>> "
 selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
+score = 0
+lives = 3
 game = True #boolean representing whether the game is ongoing or not
 
 while game:
+	print("\033[0J", end='') #Clear the screen
 	random_blocks = [block_list[0], block_list[1], block_list[2], block_list[3]]
 	print_grid(map)
+	print_score_lives(score, lives)
 	print_blocks(random_blocks)
+
+	if lives == 0:
+		game = False
+		break
 
 	#Get user input
 	print("\033[2K", end='')
@@ -162,7 +214,7 @@ while game:
 		#Otherwise we check if he entered coordinates
 		#Otherwise we check if the user enter a number
 		#it's maybe better to put this whole thing in a function
-	if user_input == "Stop playing":
+	if user_input == "q":
 		game = False
 	elif user_input == "pause":
 		prompt = "Game paused (type 'resume' to continue) >>> "
@@ -180,10 +232,11 @@ while game:
 
 			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
 				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
-				reset_full_lines_columns(map)
+				score = reset_full_lines_columns(map, score)
 				selected_block = None
 			else:
 				prompt = "Invalid position to place the block! You loose a life >>> "
+				lives -= 1
 				selected_block = None
 		else:
 			prompt = "Hello, i am annoying"
@@ -200,6 +253,6 @@ while game:
 			else:
 				prompt = "Enter a valid block number >>> "
 
-	print(f"\033[{len(map) + 3}A", end="") #put the cursor back to the top left corner of screen (where we start drawing the map)
+	print(f"\033[{len(map) + 3}A", end='') #put the cursor back to the top left corner of screen (where we start drawing the map)
 
 print("\033[100B")
