@@ -99,25 +99,42 @@ def emplace_block(grid, block, i, j):
 
 
 def row_flash(grid, i, first_square_of_line, last_square_of_line):
-	print(f"\033[{2+len(map)-i}A\033[{2+first_square_of_line}C", end='')
-	for h in range(4):
+	print(f"\033[{1+len(map)-i}A\033[{2+first_square_of_line}C", end='')
+	for h in range(4): #4 is the number of times the row will flash.
 		if h%2 == 0:
 			print("\033[7m", end='')
 		else:
 			print("\033[0m", end='')
 		for j in range(first_square_of_line, last_square_of_line+1):
-			if grid[i][j] == 0:
+			if grid[i][j] == 0: #wait here there is only full blocks so no need for ifs
 				print(' ', end='')
 			elif grid[i][j] == 1:
 				print('•', end='')
 			else:
 				print('▩', end='')
-		print(f"\033[{last_square_of_line-first_square_of_line}D", end='')
-		sleep(0.3)
+		print(f"\033[{last_square_of_line+1-first_square_of_line}D", end='')
+		sys.stdout.flush()
+		sleep(0.5)
 	print("\033[100D\033[100B", end='')
 
 def col_flash(grid, j):
-	pass
+	print(f"\033[{1+len(grid)}A\033[{2+j}C", end='')
+	for h in range(4):
+		if h%2 == 0:
+			print("\033[7m", end='')
+		else:
+			print("\033[0m", end='')
+
+		for i in range(len(grid)):
+			if grid[i][j] == 2:
+				print('▩', end='')
+				print("\033[D\033[B", end='')
+			else:
+				print("\033[B", end='')
+		sys.stdout.flush()
+		sleep(0.5)
+		print(f"\033[{len(grid)}A", end='')
+	print("\033[100D\033[100B", end='')
 
 def row_state(grid, i):
 	for cell in grid[i]:
@@ -160,11 +177,19 @@ def row_clear(grid, i):
 		if grid[0][b] == 2:
 			grid[0][b] = 1
 
+	#refresh the display of the map so that it shows that the blocks have fallen
+	print(f"\033[{len(map) + 3}A", end='')
+	print_grid(grid)
+	sys.stdout.flush()
+	print("\033[100D\033[100B", end='')
+
 	return nb_cleared_blocks
 
 
 def col_clear(grid, j):
 	nb_cleared_blocks = 0
+	col_flash(grid, j)
+
 	for line in grid:
 		if line[j] == 2:
 			line[j] = 1
@@ -232,6 +257,11 @@ while game:
 
 			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
 				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
+				#refresh the display of the map so that the user can see the blocks he placed appear
+				print(f"\033[{len(map) + 3}A", end='')
+				print_grid(map)
+				sys.stdout.flush()
+				print("\033[100D\033[100B", end='')
 				score = reset_full_lines_columns(map, score)
 				selected_block = None
 			else:
