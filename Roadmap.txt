@@ -1,8 +1,51 @@
-1. Afficher les blocks possibles à coté de la map
-2. liste tous les blocks possibles
-3. Listes de tous les blocks associés à chaque map
-4. faire en sorte que l'utilisateur puisse choisir un block et puisse choisir les coordonnées
-5. vérifier si les coordonnées sont valides
-	6. Si elles ne sont pas valides, le joueur perd un point de vie
-	7. Si elles sont valides, on place le block à l'endroit et on vérifie si ça complète une ligne
-		8. Si ça complète une ligne, on reinitialise la ligne, et on rajoute les points qui correspondent
+BASICS
+
+Displaying home screen, the user can either start or display rules
+The user can choose the shape and size of his map. Carefull! if the chosen size is more than 26, we can't have the columns and rows be named with the alphabet.
+The user can choose from two policies: choosing from three random blocks or choosing from all available blocks
+	Choosing random blocks
+	Displaying all the blocks: we should be able to change page with arrow keys (or actually zqsd would be way easier or jklm), so either player changes page or he enters a number. 
+Once a block is selected, being able to turn the block.
+At the end of the game, displaying a message reminding of the score
+Being able to save and restore a game
+Adding a time limit for each turn
+Being able to pause a game (we have to hide the board)
+Writing the report
+Known bugs: if we clear the window then launch the game, then there is a problem in the display i believe.
+
+EXTRA functionnalities:
+Opening a virtual window
+colors through ANSI escape codes.
+having an animation on the empty squares (think about carambolage)
+playing music in the background by launching a process in the background.
+having the window flash when the user gets to a certain score (see the flasher code somewhere in the ansi escape code search tabs)
+
+IDEAS TO MAKE IT REAL
+
+https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+The keyboard strings section could be used to remap the arrow keys to a letter + enter so say the user can use either jklm or arrow keys we basically transform the arrow keys into jklm too so we can catch them with the input.
+
+REPORT
+
+For the README file:
+1- Quick description of the project
+2- authors and collaborators
+3- Guide of installation and use
+4- List of dependencies / third party library (link to the sources)
+5- Code that was not written by you
+6- Probably add in sources that helped us
+6- Known issues and bugs
+...
+
+PRESENTATION
+
+put inphasis on the fact that the code is very concise and clear : 1point if you add a line, 2 if you delete one! less is more!
+speak about the Unicode fucker square bug. (the square somehow taking more than one character of space.)
+never trust user input! (maybe put the image of je code avec le cul) (for the coordinates)
+
+
+Bugs!
+Unicode square that took more than one character of space which shifted all the display
+
+sys.stdout.flush() : https://stackoverflow.com/questions/10019456/usage-of-sys-stdout-flush-method
+Before there was strange behaviour that i didn't understand sometimes i would tell the code to print something then sleep and it would sleep then print everything at the same time.

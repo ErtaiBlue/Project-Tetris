@@ -1,6 +1,44 @@
 from time import sleep
 import sys
 
+def display_rules():
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+	print("\033[2J", end='')
+
+	print("PyTetris is a game where you have to place blocks to compleat rows and columns.")
+	print("There are different boards with different shapes. You can choose the size and shape of the board, \
+then you can choose between two policies: either you can choose from all available blocks, \
+either you can choose from a set of three randomly chosen blocks")
+	print("To place a block, you must select it by typing in it's number, \
+then typing the coordinates where the bottom left cell of the block will be placed")
+	print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so.\
+The game ends when you loose your three lives.")
+	print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
+	print("Have fun!")
+
+	user_input = input("Press 1 when you are ready to start playing")
+
+	while user_input != "1":
+		user_input = input("Press 1 when you are ready to start playing")
+
+
+def homescreen():
+	print("_|_|_|              _|_|_|_|_|            _|                _|\n\
+_|    _|  _|    _|      _|      _|_|    _|_|_|_|  _|  _|_|        _|_|_|\n\
+_|_|_|    _|    _|      _|    _|_|_|_|    _|      _|_|      _|  _|_|\n\
+_|        _|    _|      _|    _|          _|      _|        _|      _|_|\n\
+_|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
+                _|\n\
+            _|_|\n\n\n")
+	user_input = input("Press 1 to start playing, 2 to display the rules")
+
+	while not(user_input == "1" or user_input == "2"):
+		user_input = input("Press 1 to start playing, 2 to display the rules")
+	if user_input == "2":
+		display_rules()
+
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+
 def read_grid(path):
 	""" Returns a map matrix of integers representing the content of the cell. The map file has return characters at the end of each line,
 	so i take each line without the last character (line[:len(line)-1]). This is why i added a return at the end of the diamond.txt file.
@@ -10,14 +48,14 @@ def read_grid(path):
 		map = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()]
 		return map
 
-def print_grid(map):
-	print('  ', "abcdefghijklmnopqrstuvwxyz"[:len(map[0])], ' ', sep='')
-	#print the map
-	print(' ', '-' * (len(map[0]) + 2), sep='')
-	for row in range(len(map)):
+def print_grid(grid):
+	print('  ', "abcdefghijklmnopqrstuvwxyz"[:len(grid[0])], ' ', sep='')
+	#print the grid
+	print(' ', '-' * (len(grid[0]) + 2), sep='')
+	for row in range(len(grid)):
 		print("ABCDEFGHIJKLMNOPQRSTUVXYZ"[row], end='')
 		print('|', end= '')
-		for cell in map[row]:
+		for cell in grid[row]:
 			if cell == 0:
 				print(' ', end='')
 			elif cell == 1:
@@ -25,9 +63,9 @@ def print_grid(map):
 			else:
 				print('▩', end='')
 		print('|')
-	print(' ', '-' * (len(map[0]) + 2), sep='')
+	print(' ', '-' * (len(grid[0]) + 2), sep='')
 
-	print(f"\033[{len(map)+3}A", f"\033[{len(map[0]) + 3}C", end='') #Move the cursor to the original position from which we start drawing the map.
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def print_score_lives(score, lives):
 	#print the score
@@ -69,7 +107,8 @@ def print_blocks(blocks):
 
 		print(f"\033[{len(block) + 2}A\033[{len(block[0])+2}C", end='     ')
 
-	print("\033[100B\033[100D", end='') #put the cursor to the bottom of the terminal
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+	
 
 def is_input_coordinates(user_input, mapwidth, mapheight):
 	input = user_input.split(',')
@@ -106,20 +145,15 @@ def row_flash(grid, i, first_square_of_line, last_square_of_line):
 		else:
 			print("\033[0m", end='')
 		for j in range(first_square_of_line, last_square_of_line+1):
-			if grid[i][j] == 0: #wait here there is only full blocks so no need for ifs
-				print(' ', end='')
-			elif grid[i][j] == 1:
-				print('•', end='')
-			else:
-				print('▩', end='')
+			print('▩', end='')
 		print(f"\033[{last_square_of_line+1-first_square_of_line}D", end='')
 		sys.stdout.flush()
 		sleep(0.5)
-	print("\033[100D\033[100B", end='')
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def col_flash(grid, j):
 	print(f"\033[{1+len(grid)}A\033[{2+j}C", end='')
-	for h in range(4):
+	for h in range(4): #4 is the number of times the column will flash
 		if h%2 == 0:
 			print("\033[7m", end='')
 		else:
@@ -178,10 +212,9 @@ def row_clear(grid, i):
 			grid[0][b] = 1
 
 	#refresh the display of the map so that it shows that the blocks have fallen
-	print(f"\033[{len(map) + 3}A", end='')
 	print_grid(grid)
 	sys.stdout.flush()
-	print("\033[100D\033[100B", end='')
+	print(f"\033[{len(map) + 3}B", end='')
 
 	return nb_cleared_blocks
 
@@ -215,22 +248,28 @@ selected_block = None #variable containing the index of the block selected by th
 score = 0
 lives = 3
 game = True #boolean representing whether the game is ongoing or not
+print("\033[?1049h", end='') #Enter alternative screen buffer (this is for instance what vim uses to create a new text editing window inside the terminal)
+print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+
+homescreen()
 
 while game:
-	print("\033[0J", end='') #Clear the screen
+	print("\033[2J", end='') #Clear the screen
 	random_blocks = [block_list[0], block_list[1], block_list[2], block_list[3]]
+	
 	print_grid(map)
+	print(f"\033[{len(map[0]) + 3}C", end='')
 	print_score_lives(score, lives)
 	print_blocks(random_blocks)
+	print(f"\033[{len(map) + 3}B", end='')
 
 	if lives == 0:
 		game = False
 		break
 
 	#Get user input
-	print("\033[2K", end='')
 	user_input = input(prompt)
-	print("\033[T", end='') #Scrolls up a line, eliminating the newline created by input
+
 	if prompt != ">>> ":
 		prompt = ">>> "
 
@@ -258,10 +297,10 @@ while game:
 			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
 				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
 				#refresh the display of the map so that the user can see the blocks he placed appear
-				print(f"\033[{len(map) + 3}A", end='')
+				print("\033[100D\033[100A", end='')
 				print_grid(map)
 				sys.stdout.flush()
-				print("\033[100D\033[100B", end='')
+				print(f"\033[{len(map) + 3}B", end='')
 				score = reset_full_lines_columns(map, score)
 				selected_block = None
 			else:
@@ -269,8 +308,7 @@ while game:
 				lives -= 1
 				selected_block = None
 		else:
-			prompt = "Hello, i am annoying"
-			#prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+			prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
 	else:
 		try:
 			user_input = int(user_input)
@@ -283,6 +321,7 @@ while game:
 			else:
 				prompt = "Enter a valid block number >>> "
 
-	print(f"\033[{len(map) + 3}A", end='') #put the cursor back to the top left corner of screen (where we start drawing the map)
+	print("\033[100D\033[100A", end='')
 
-print("\033[100B")
+print("\033[?1049l") #Quit alternative screen buffer
+print("Your final score was:", score)
