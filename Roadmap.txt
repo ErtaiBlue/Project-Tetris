@@ -1,7 +1,6 @@
 BASICS
 
 Displaying home screen, the user can either start or display rules
-The user can choose the shape and size of his map. Carefull! if the chosen size is more than 26, we can't have the columns and rows be named with the alphabet.
 The user can choose from two policies: choosing from three random blocks or choosing from all available blocks
 	Choosing random blocks
 	Displaying all the blocks: we should be able to change page with arrow keys (or actually zqsd would be way easier or jklm), so either player changes page or he enters a number. 
@@ -10,7 +9,8 @@ Being able to save and restore a game
 Adding a time limit for each turn
 Being able to pause a game (we have to hide the board)
 Writing the report
-Known bugs: if we clear the window then launch the game, then there is a problem in the display i believe.
+Known bugs: the blocks can't have an empty first column, otherwise we can't place them on the a column.
+Can't place on cc, O or O, CC and be carefull about weird maplengths being equal to 26.
 
 EXTRA functionnalities:
 colors through ANSI escape codes.
@@ -37,6 +37,7 @@ For the README file:
 
 PRESENTATION
 
+put inphasis on the fact that i use no librairies
 put inphasis on the fact that the code is very concise and clear : 1point if you add a line, 2 if you delete one! less is more!
 never trust user input! (maybe put a funny image) (for the coordinates)
 
@@ -46,3 +47,16 @@ Unicode square that took more than one character of space which shifted all the 
 
 sys.stdout.flush() : https://stackoverflow.com/questions/10019456/usage-of-sys-stdout-flush-method
 Before there was strange behaviour that i didn't understand sometimes i would tell the code to print something then sleep and it would sleep then print everything at the same time.
+
+Against certain questions:
+
+On a question about the generate_grid() function, why do we return a direct grid for the first values:
+1		0 1 0          0 1 1 1 0            0 0 1 1 1 0 0				0 0 0 1 1 1 0 0 0	From then on, we only add 2 lines in the middle
+		1 1 1          1 1 1 1 1            0 1 1 1 1 1 0				0 0 1 1 1 1 1 1 0
+		0 1 0		   1 1 1 1 1            1 1 1 1 1 1 1				0 1 1 1 1 1 1 1 0
+		               1 1 1 1 1            1 1 1 1 1 1 1				1 1 1 1 1 1 1 1 1
+		               0 1 1 1 0            1 1 1 1 1 1 1				1 1 1 1 1 1 1 1 1
+		               						0 1 1 1 1 1 0				1 1 1 1 1 1 1 1 1
+		               						0 0 1 1 1 0 0				0 1 1 1 1 1 1 1 0
+		               													0 0 1 1 1 1 1 0 0
+		               													0 0 0 1 1 1 0 0 0

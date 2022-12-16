@@ -123,21 +123,33 @@ def read_grid(path):
 		return map
 
 def print_grid(grid):
-	print('  ', "abcdefghijklmnopqrstuvwxyz"[:len(grid[0])], ' ', sep='')
+	print('   ', end='')
+	for i in range(len(grid[0])):
+		print("abcdefghijklmnopqrstuvwxyz"[i%26] + ' ', end='')
+	print("\n", end='')
+
 	#print the grid
-	print(' ', '-' * (len(grid[0]) + 2), sep='')
+	print(' ', end='')
+	for i in range(len(grid[0]) + 2):
+		print('- ', end='')
+	print("\n", end='')
+
 	for row in range(len(grid)):
-		print("ABCDEFGHIJKLMNOPQRSTUVXYZ"[row], end='')
-		print('|', end= '')
+		print("ABCDEFGHIJKLMNOPQRSTUVWXYZ"[row%26], end='')
+		print('| ', end= '')
 		for cell in grid[row]:
 			if cell == 0:
-				print(' ', end='')
+				print('  ', end='')
 			elif cell == 1:
-				print('•', end='')
+				print('• ', end='')
 			else:
-				print('▩', end='')
+				print('▩ ', end='')
 		print('|')
-	print(' ', '-' * (len(grid[0]) + 2), sep='')
+
+	print(' ', end='')
+	for i in range(len(grid[0]) + 2):
+		print('- ', end='')
+	print("\n", end='')
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
@@ -187,19 +199,43 @@ def print_blocks(blocks):
 def is_input_coordinates(user_input, mapwidth, mapheight):
 	input = user_input.split(',')
 	columns = "abcdefghijklmnopqrstuvwxyz"
-	rows = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
-	if len(input) != 2 or not(input[0] in columns[:mapwidth]) or not(input[1] in rows[:mapheight]):
+	rows = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	if len(input) != 2:
 		return False
+
+	if not(input[0] == input[0][0]*len(input[0])): #check if the first part of the input is constituted of the same character
+		return False
+	if not(input[0][0] in columns[:mapwidth]) or (len(input[0])>1 and not(input[0][0] in columns[:mapwidth%26])): #check if input is on the board
+		return False
+
+	if not(input[1] == input[1][0]*len(input[1])): #check if the second part of the input is constituted of the same character
+		return False
+	if not(input[1][0] in rows[:mapheight]) or (len(input[1])>1 and not(input[1][0] in rows[:mapheight%26])): #check if input is on the board
+		return False
+
+	return True
+
+def convert_input_coordinates(user_input):
+	input = user_input.split(',')
+	if len(input[1]) == 1:
+		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1])
 	else:
-		return True
+		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1][0]) + len(map)//27*26
+	if len(input[0]) == 1:
+		j = "abcdefghijklmnopqrstuvwxyz".index(input[0])
+	else:
+		j = "abcdefghijklmnopqrstuvwxyz".index(input[0][0]) + len(map[0])//27*26
+	return i, j
+
 
 def valid_position(grid, block, i, j):
 	for a in range(len(block)):
 		for b in range(len(block[0])):
-			if block[a][b] == 2 and (i-(len(block) -a -1) < 0 or j+b > len(grid[0])-1): #this means the block would be placed out of bounds
-				return False
-			if ( grid[i-(len(block) -a -1)][j+b] == 0 and block[a][b] == 2 ) or grid[i-(len(block) -a -1)][j+b] + block[a][b] == 4: #This means the block would be placed on an invalid square or an already filled square
-				return False
+			if block[a][b] == 2:
+				if (i-(len(block)-a-1) < 0 or j+b > len(grid[0])-1): #This means the block would be placed out of bounds
+					return False
+				if grid[i-(len(block)-a-1)][j+b] == 0 or grid[i-(len(block) -a -1)][j+b] + block[a][b] == 4: #This means the block would be placed on an invalid cell or an already occupied cell
+					return False
 	return True
 
 def emplace_block(grid, block, i, j):
@@ -207,26 +243,24 @@ def emplace_block(grid, block, i, j):
 		for b in range(len(block[0])):
 			if block[a][b] == 2:
 				grid[i-(len(block) -a -1)][j+b] = block[a][b]
-			else:
-				grid[i-(len(block) -a -1)][j+b] = grid[i-(len(block) -a -1)][j+b] + block[a][b]
 
 
 def row_flash(grid, i, first_square_of_line, last_square_of_line):
-	print(f"\033[{1+len(map)-i}A\033[{2+first_square_of_line}C", end='')
+	print(f"\033[{1+len(map)-i}A\033[{3+first_square_of_line*2}C", end='')
 	for h in range(4): #4 is the number of times the row will flash.
 		if h%2 == 0:
 			print("\033[7m", end='')
 		else:
 			print("\033[0m", end='')
 		for j in range(first_square_of_line, last_square_of_line+1):
-			print('▩', end='')
-		print(f"\033[{last_square_of_line+1-first_square_of_line}D", end='')
+			print('▩', end="\033[C")
+		print(f"\033[{(last_square_of_line+1-first_square_of_line)*2}D", end='')
 		sys.stdout.flush()
 		sleep(0.5)
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def col_flash(grid, j):
-	print(f"\033[{1+len(grid)}A\033[{2+j}C", end='')
+	print(f"\033[{1+len(grid)}A\033[{3+j*2}C", end='')
 	for h in range(4): #4 is the number of times the column will flash
 		if h%2 == 0:
 			print("\033[7m", end='')
@@ -333,7 +367,7 @@ while game:
 	random_blocks = [block_list[0], block_list[1], block_list[2], block_list[3]]
 	
 	print_grid(map)
-	print(f"\033[{len(map[0]) + 3}C", end='')
+	print(f"\033[{len(map[0])*2 + 4}C", end='')
 	print_score_lives(score, lives)
 	print_blocks(random_blocks)
 	print(f"\033[{len(map) + 3}B", end='')
@@ -366,11 +400,10 @@ while game:
 	elif selected_block != None:
 		if is_input_coordinates(user_input, len(map[0]), len(map)):
 			#Transform the coordinates from string to numbers	
-			coordinates = user_input.split(',')
-			coordinates[0], coordinates[1] = "ABCDEFGHIJKLMNOPQRSTUVXYZ".index(coordinates[1]), "abcdefghijklmnopqrstuvwxyz".index(coordinates[0])
+			i, j = convert_input_coordinates(user_input)
 
-			if valid_position(map, random_blocks[selected_block], coordinates[0], coordinates[1]):
-				emplace_block(map, random_blocks[selected_block], coordinates[0], coordinates[1])
+			if valid_position(map, random_blocks[selected_block], i, j):
+				emplace_block(map, random_blocks[selected_block], i, j)
 				#refresh the display of the map so that the user can see the blocks he placed appear
 				print("\033[100D\033[100A", end='')
 				print_grid(map)
