@@ -39,6 +39,80 @@ _|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
+def menu():
+	print("\033[2J", end='')
+
+	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle map")
+	while not(shape == "diamond" or shape == "circle" or shape == "triangle"):
+		shape = input("Choose the shape of the map. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle map")
+
+	size = 0
+	while type(size) == str or size < 1 or size%2 == 0:
+		size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids")
+		try:
+			size = int(size)
+		except ValueError:
+			print("The width is a number")
+
+	policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks. Enter '1' to have access to all blocks, '2' for randomly chosen blocks")
+	while not(policie == "1" or policie == "2"):
+		policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks. Enter '1' to have access to all blocks, '2' for randomly chosen blocks")
+
+	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+	return shape, size, policie
+
+def generate_grid(shape, size):
+	if shape == "diamond":
+		grid = [[] for x in range(size)]
+		for i in range(0, size//2):
+			for j in range(0, (size-i*2)//2):
+				grid[i].append(0)
+			for j in range(0, 1+i*2):
+				grid[i].append(1)
+			for j in range(0, (size-i*2)//2):
+				grid[i].append(0)
+		for i in range(0, size//2+1):
+			for j in range(0, i):
+				grid[size//2+i].append(0)
+			for j in range(0, size-i*2):
+				grid[size//2+i].append(1)
+			for j in range(0, i):
+				grid[size//2+i].append(0)
+		return grid
+
+	elif shape == "triangle":
+		grid = [[] for x in range((size+1)//2)]
+		for i in range(0, (size+1)//2):
+			for j in range(0, (size-1)//2-i):
+				grid[i].append(0)
+			for j in range(0, 1+i*2):
+				grid[i].append(1)
+			for j in range(0, (size-1)//2-i):
+				grid[i].append(0)
+		return grid
+
+	else:
+		if size == 1:
+			grid = [[1]]
+		elif size == 3:
+			grid = [[0,1,0], [1,1,1], [0,1,0]]
+		elif size == 5:
+			grid = [[0,1,1,1,0], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [0,1,1,1,0]]
+		elif size == 7:
+			grid = [[0,0,1,1,1,0,0], [0,1,1,1,1,1,0], [1,1,1,1,1,1,1], [1,1,1,1,1,1,1], [1,1,1,1,1,1,1], [0,1,1,1,1,1,0], [0,0,1,1,1,0,0]]
+		else:
+			grid = [[] for x in range(size)]
+			grid[0] = [0,0,0] + [1 for x in range(size-6)] + [0,0,0]
+			grid[1] = [0,0] + [1 for x in range(size-4)] + [0,0]
+			grid[2] = [0] + [1 for x in range(size-2)] + [0]
+			for i in range(3, size-3):
+				grid[i] = [1 for x in range(size)]
+			grid[size-3] = [0] + [1 for x in range(size-2)] + [0]
+			grid[size-2] = [0,0] + [1 for x in range(size-4)] + [0,0]
+			grid[size-1] = [0,0,0] + [1 for x in range(size-6)] + [0,0,0]
+
+		return grid
+
 def read_grid(path):
 	""" Returns a map matrix of integers representing the content of the cell. The map file has return characters at the end of each line,
 	so i take each line without the last character (line[:len(line)-1]). This is why i added a return at the end of the diamond.txt file.
@@ -242,7 +316,6 @@ def reset_full_lines_columns(grid, score):
 
 
 block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]], [[2]]]
-map = read_grid("diamond.txt")
 prompt = ">>> "
 selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
 score = 0
@@ -252,6 +325,8 @@ print("\033[?1049h", end='') #Enter alternative screen buffer (this is for insta
 print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 homescreen()
+shape, size, policie = menu()
+map = generate_grid(shape, size)
 
 while game:
 	print("\033[2J", end='') #Clear the screen

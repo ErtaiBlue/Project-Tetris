@@ -6,7 +6,6 @@ The user can choose from two policies: choosing from three random blocks or choo
 	Choosing random blocks
 	Displaying all the blocks: we should be able to change page with arrow keys (or actually zqsd would be way easier or jklm), so either player changes page or he enters a number. 
 Once a block is selected, being able to turn the block.
-At the end of the game, displaying a message reminding of the score
 Being able to save and restore a game
 Adding a time limit for each turn
 Being able to pause a game (we have to hide the board)
@@ -14,7 +13,6 @@ Writing the report
 Known bugs: if we clear the window then launch the game, then there is a problem in the display i believe.
 
 EXTRA functionnalities:
-Opening a virtual window
 colors through ANSI escape codes.
 having an animation on the empty squares (think about carambolage)
 playing music in the background by launching a process in the background.
@@ -40,8 +38,7 @@ For the README file:
 PRESENTATION
 
 put inphasis on the fact that the code is very concise and clear : 1point if you add a line, 2 if you delete one! less is more!
-speak about the Unicode fucker square bug. (the square somehow taking more than one character of space.)
-never trust user input! (maybe put the image of je code avec le cul) (for the coordinates)
+never trust user input! (maybe put a funny image) (for the coordinates)
 
 
 Bugs!
