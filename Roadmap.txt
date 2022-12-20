@@ -1,13 +1,14 @@
 BASICS
 
 Displaying home screen, the user can either start or display rules
-The user can choose from two policies: choosing from three random blocks or choosing from all available blocks
-	Choosing random blocks
-	Displaying all the blocks: we should be able to change page with arrow keys (or actually zqsd would be way easier or jklm), so either player changes page or he enters a number. 
+Adding all blocks in the game 
 Once a block is selected, being able to turn the block.
+Showing the selected block in a different color.
 Being able to save and restore a game
 Adding a time limit for each turn
 Being able to pause a game (we have to hide the board)
+having a help command in game. Saying how to change page.
+Catching the width and heigth of the window using 100C and 100B then reporting cursor position.
 Writing the report
 Known bugs: the blocks can't have an empty first column, otherwise we can't place them on the a column.
 Can't place on cc, O or O, CC and be carefull about weird maplengths being equal to 26.

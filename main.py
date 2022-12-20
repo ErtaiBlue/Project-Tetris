@@ -1,4 +1,5 @@
 from time import sleep
+import random
 import sys
 
 def display_rules():
@@ -167,15 +168,19 @@ def print_score_lives(score, lives):
 	print("#" * (9+3+2), end='')
 	print(f"\033[{9+len(str(score))+2+5+9+3+2}D\033[3B", end='') #reposition the cursor
 
-def print_blocks(blocks):
-	#print the three randomly chosen blocks (should their scale be changed? cuz there is one block in the diamond map that looks like really big)
+def print_blocks(blocks, page, NB_BLOCKS_PER_PAGE, selected_block):
+	#print the blocks to be chosen from
 
-	counter = 0
-	for block in blocks:
-		print('-' * (len(block[0])+2), end=f"\033[{len(block[0])+2}D\033[B")
+	for i in range(len(blocks)):
+		if selected_block != None and i+1+(page-1)*NB_BLOCKS_PER_PAGE == selected_block+1:
+			print("\033[38;2;250;48;48m", end='')
+		print('-' * (len(blocks[i][0])+2), end=f"\033[{len(blocks[i][0])+2}D\033[B")
 		
-		for line in block:
+		for line in blocks[i]:
+			if selected_block != None and i+1+(page-1)*NB_BLOCKS_PER_PAGE == selected_block+1:
+				print("\033[38;2;250;48;48m", end='')
 			print('|', end='')
+			print("\033[38;2;255;255;255m", end='')
 			for cell in line:
 				if cell == 0:
 					print(' ', end='')
@@ -183,15 +188,23 @@ def print_blocks(blocks):
 					print('•', end='')
 				else:
 					print('▩', end='')
+			if selected_block != None and i+1+(page-1)*NB_BLOCKS_PER_PAGE == selected_block+1:
+				print("\033[38;2;250;48;48m", end='')
 			print('|', end=f"\033[{len(line)+2}D\033[B")
 
-		print('-' * (len(block[0])+2), end=f"\033[{len(block[0])+2}D\033[B")		
-		
-		#be carefull even or odd number of len of block[0]and behaviour of //
-		counter += 1
-		print(' ' * ((len(block[0]))//2), counter, end=f"\033[{(len(block[0])+2)//2 +1}D")
+		print('-' * (len(blocks[i][0])+2), end=f"\033[{len(blocks[i][0])+2}D\033[B")		
+		print("\033[38;2;255;255;255m", end='')
 
-		print(f"\033[{len(block) + 2}A\033[{len(block[0])+2}C", end='     ')
+		if i%5 == 0:
+			print("\0337", end='') #saves cursor position (might not work on terminals other than xterm)
+
+		#be carefull even or odd number of len of block[0]and behaviour of //
+		print(' ' * ((len(blocks[i][0]))//2), i+1+(page-1)*NB_BLOCKS_PER_PAGE, end=f"\033[{(len(blocks[i][0])+2)//2 +1}D")
+
+		if (i+1)%5 == 0:
+			print("\0338\033[3B", end='') #Restores cursor position and moves it three lines down.
+		else:
+			print(f"\033[{len(blocks[i]) + 2}A\033[{len(blocks[i][0])+2}C", end='     ')
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 	
@@ -348,12 +361,14 @@ def reset_full_lines_columns(grid, score):
 	return score
 
 
-
-block_list = [ [[2, 0], [2, 0], [2, 2]], [[0, 2], [0, 2], [2, 2]], [[0, 2, 0], [0, 2, 0], [0, 2, 0]], [[2]]]
+NB_BLOCKS_PER_PAGE = 10
+common_block_list = [ [[2,0], [2,2]], [[0,2], [2,2]], [[2,0,0], [2,2,2]], [[2,2], [0,2], [0,2]], [[2,0], [2,2], [2,0]], [[2,2,0], [0,2,2]], [[2,0], [2,2], [0,2]], [[2], [2], [2], [2]], [[2,2], [2,2]],
+[[2,2], [0,2]], [[2,2], [2,0]], [[0,0,2], [2,2,2]], [[2,0], [2,0], [2,2]], [[0,2], [2,2], [0,2]], [[2,2,2], [0,2,2]], [[0,2,2], [2,2,0]], [[0,2], [2,2], [2,0]], [[2,2,2,2]], [[2]] ]
 prompt = ">>> "
 selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
 score = 0
 lives = 3
+page = 1 #this represents the blocks to be displayed from the blocks the user can choose from
 game = True #boolean representing whether the game is ongoing or not
 print("\033[?1049h", end='') #Enter alternative screen buffer (this is for instance what vim uses to create a new text editing window inside the terminal)
 print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
@@ -361,15 +376,18 @@ print("\033[100D\033[100A", end='') #Position the cursor in top left corner of s
 homescreen()
 shape, size, policie = menu()
 map = generate_grid(shape, size)
+if policie == "1":
+	available_blocks = common_block_list
+else:
+	available_blocks = random.choices(common_block_list, k=3)
 
 while game:
 	print("\033[2J", end='') #Clear the screen
-	random_blocks = [block_list[0], block_list[1], block_list[2], block_list[3]]
 	
 	print_grid(map)
 	print(f"\033[{len(map[0])*2 + 4}C", end='')
 	print_score_lives(score, lives)
-	print_blocks(random_blocks)
+	print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
 	print(f"\033[{len(map) + 3}B", end='')
 
 	if lives == 0:
@@ -402,14 +420,15 @@ while game:
 			#Transform the coordinates from string to numbers	
 			i, j = convert_input_coordinates(user_input)
 
-			if valid_position(map, random_blocks[selected_block], i, j):
-				emplace_block(map, random_blocks[selected_block], i, j)
+			if valid_position(map, available_blocks[selected_block], i, j):
+				emplace_block(map, available_blocks[selected_block], i, j)
 				#refresh the display of the map so that the user can see the blocks he placed appear
 				print("\033[100D\033[100A", end='')
 				print_grid(map)
 				sys.stdout.flush()
 				print(f"\033[{len(map) + 3}B", end='')
 				score = reset_full_lines_columns(map, score)
+				available_blocks[selected_block] = random.choice(common_block_list)
 				selected_block = None
 			else:
 				prompt = "Invalid position to place the block! You loose a life >>> "
@@ -417,13 +436,19 @@ while game:
 				selected_block = None
 		else:
 			prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+	elif user_input == "h":
+		if page > 1:
+			page = page - 1
+	elif user_input == "l":
+		if page < (len(available_blocks)//NB_BLOCKS_PER_PAGE + (len(available_blocks)%NB_BLOCKS_PER_PAGE > 0)): #If the page number is inferior to the number of blocks divided by the nb of blocks per page th whole rounded up.
+			page = page + 1 
 	else:
 		try:
 			user_input = int(user_input)
 		except ValueError:
 			prompt = "Enter the number of a block or a valid command >>> "
 		else:
-			if user_input > 0 and user_input <= len(random_blocks):
+			if user_input > 0 and user_input <= len(available_blocks):
 				selected_block = user_input-1
 				prompt = "Enter the coordinates to place the block (or type 'unselect' to unselect the block) >>> "
 			else:
