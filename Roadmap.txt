@@ -1,9 +1,6 @@
 BASICS
 
 Displaying home screen, the user can either start or display rules
-Adding all blocks in the game 
-Once a block is selected, being able to turn the block.
-Showing the selected block in a different color.
 Being able to save and restore a game
 Adding a time limit for each turn
 Being able to pause a game (we have to hide the board)
@@ -33,7 +30,7 @@ For the README file:
 4- List of dependencies / third party library (link to the sources)
 5- Code that was not written by you
 6- Probably add in sources that helped us
-6- Known issues and bugs
+7- Known issues and bugs
 ...
 
 PRESENTATION

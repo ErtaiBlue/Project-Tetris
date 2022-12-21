@@ -184,8 +184,6 @@ def print_blocks(blocks, page, NB_BLOCKS_PER_PAGE, selected_block):
 			for cell in line:
 				if cell == 0:
 					print(' ', end='')
-				elif cell == 1:
-					print('•', end='')
 				else:
 					print('▩', end='')
 			if selected_block != None and i+1+(page-1)*NB_BLOCKS_PER_PAGE == selected_block+1:
@@ -207,7 +205,19 @@ def print_blocks(blocks, page, NB_BLOCKS_PER_PAGE, selected_block):
 			print(f"\033[{len(blocks[i]) + 2}A\033[{len(blocks[i][0])+2}C", end='     ')
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
-	
+
+def rotate(block, dir):
+    #clockwise if dir = True
+    rotated_block = []
+
+    if dir == True:
+        for i in range(len(block[0])):
+            rotated_block.append([block[j][i] for j in range(len(block)-1, -1, -1)])
+    else:
+        for i in range(len(block[0])-1, -1, -1):
+            rotated_block.append([line[i] for line in block])
+
+    return rotated_block
 
 def is_input_coordinates(user_input, mapwidth, mapheight):
 	input = user_input.split(',')
@@ -362,8 +372,63 @@ def reset_full_lines_columns(grid, score):
 
 
 NB_BLOCKS_PER_PAGE = 10
-common_block_list = [ [[2,0], [2,2]], [[0,2], [2,2]], [[2,0,0], [2,2,2]], [[2,2], [0,2], [0,2]], [[2,0], [2,2], [2,0]], [[2,2,0], [0,2,2]], [[2,0], [2,2], [0,2]], [[2], [2], [2], [2]], [[2,2], [2,2]],
-[[2,2], [0,2]], [[2,2], [2,0]], [[0,0,2], [2,2,2]], [[2,0], [2,0], [2,2]], [[0,2], [2,2], [0,2]], [[2,2,2], [0,2,2]], [[0,2,2], [2,2,0]], [[0,2], [2,2], [2,0]], [[2,2,2,2]], [[2]] ]
+universal_block_list = [ [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0]],
+[[0,0,0,0,0], [0,2,2,0,0], [2,2,2,2,0], [2,2,2,2,0], [0,2,2,0,0]], 
+[[0,0,0,0,0], [2,0,0,2,0], [2,0,0,2,0], [2,0,0,2,0], [2,2,2,2,0]], 
+[[0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0], [0,0,0,2,0], [0,0,0,2,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0]], 
+[[2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [2,2,2,2,2], [2,0,0,0,2], [0,0,0,0,0], [2,2,2,2,2]], 
+[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,2], [2,2,2,2,2]], 
+[[0,0,0,0,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0], [2,0,0,0,0]],
+[[0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0], [0,0,0,2,0]], 
+[[0,0,0,0,0], [2,2,2,2,0], [0,2,2,0,0], [0,2,2,0,0], [0,2,2,0,0]], 
+[[0,0,0,0,0], [2,0,0,2,0], [0,2,2,0,0], [0,2,2,0,0], [2,0,0,2,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,2], [0,2,2,2,0], [0,0,2,0,0]], 
+[[0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0]], 
+[[0,0,0,0,0], [0,0,0,2,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,2,0], [2,2,2,2,0], [0,0,0,2,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0]], 
+[[0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,2,2,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [0,2,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [0,2,0,0,0], [0,0,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
+[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0]] ]
+circle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+diamond_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 31, 32, 33, 34, 35, 20, 36, 37, 28, 38, 39, 40, 41]
+triangle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+
 prompt = ">>> "
 selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
 score = 0
@@ -376,10 +441,14 @@ print("\033[100D\033[100A", end='') #Position the cursor in top left corner of s
 homescreen()
 shape, size, policie = menu()
 map = generate_grid(shape, size)
-if policie == "1":
-	available_blocks = common_block_list
+if shape == "circle":
+		available_blocks = [universal_block_list[x] for x in circle_block_list]
+elif shape == "diamond":
+	available_blocks = [universal_block_list[x] for x in diamond_block_list]
 else:
-	available_blocks = random.choices(common_block_list, k=3)
+	available_blocks = [universal_block_list[x] for x in triangle_block_list]
+if policie == "2":
+	available_blocks = random.choices(available_blocks, k=3)
 
 while game:
 	print("\033[2J", end='') #Clear the screen
@@ -416,7 +485,12 @@ while game:
 	elif user_input == "unselect":
 		selected_block = None
 	elif selected_block != None:
-		if is_input_coordinates(user_input, len(map[0]), len(map)):
+		if user_input == "l":
+			available_blocks[selected_block] = rotate(available_blocks[selected_block], True)
+		elif user_input == "h":
+			available_blocks[selected_block] = rotate(available_blocks[selected_block], False)
+
+		elif is_input_coordinates(user_input, len(map[0]), len(map)):
 			#Transform the coordinates from string to numbers	
 			i, j = convert_input_coordinates(user_input)
 
@@ -428,7 +502,13 @@ while game:
 				sys.stdout.flush()
 				print(f"\033[{len(map) + 3}B", end='')
 				score = reset_full_lines_columns(map, score)
-				available_blocks[selected_block] = random.choice(common_block_list)
+				if policie == "2":
+					if shape == "circle":
+						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in circle_block_list])
+					elif shape == "diamond":
+						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in diamond_block_list])
+					else:
+						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in triangle_block_list])
 				selected_block = None
 			else:
 				prompt = "Invalid position to place the block! You loose a life >>> "
@@ -436,6 +516,7 @@ while game:
 				selected_block = None
 		else:
 			prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+
 	elif user_input == "h":
 		if page > 1:
 			page = page - 1
