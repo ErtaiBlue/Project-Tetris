@@ -59,9 +59,9 @@ _|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
 def menu():
 	print("\033[2J", end='')
 
-	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle map")
+	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid")
 	while not(shape == "diamond" or shape == "circle" or shape == "triangle"):
-		shape = input("Choose the shape of the map. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle map")
+		shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid")
 
 	size = 0
 	while type(size) == str or size < 1 or size%2 == 0:
@@ -143,12 +143,12 @@ def read_game_info(path):
 	return shape, random_blocks, score, lives
 
 def read_grid(path):
-	""" Returns a map matrix of integers representing the content of the cell. The map file has return characters at the end of each line,
+	""" Returns a grid matrix of integers representing the content of the cell. The grid file has return characters at the end of each line,
 	so i take each line without the last character (line[:len(line)-1])."""
 	
 	with open(path, 'r') as file:
-		map = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()[4:]]
-	return map
+		grid = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()[4:]]
+	return grid
 
 def save_game_info(path, shape, random_blocks, score, lives):
 	with open(path, 'w') as file:
@@ -273,7 +273,7 @@ def rotate(block, dir):
 
     return rotated_block
 
-def is_input_coordinates(user_input, mapwidth, mapheight):
+def is_input_coordinates(user_input, gridwidth, gridheight):
 	input = user_input.split(',')
 	columns = "abcdefghijklmnopqrstuvwxyz"
 	rows = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -282,12 +282,12 @@ def is_input_coordinates(user_input, mapwidth, mapheight):
 
 	if not(input[0] == input[0][0]*len(input[0])): #check if the first part of the input is constituted of the same character
 		return False
-	if not(input[0][0] in columns[:mapwidth]) or (len(input[0])>1 and not(input[0][0] in columns[:mapwidth%26])): #check if input is on the board
+	if not(input[0][0] in columns[:gridwidth]) or (len(input[0])>1 and not(input[0][0] in columns[:gridwidth%26])): #check if input is on the board
 		return False
 
 	if not(input[1] == input[1][0]*len(input[1])): #check if the second part of the input is constituted of the same character
 		return False
-	if not(input[1][0] in rows[:mapheight]) or (len(input[1])>1 and not(input[1][0] in rows[:mapheight%26])): #check if input is on the board
+	if not(input[1][0] in rows[:gridheight]) or (len(input[1])>1 and not(input[1][0] in rows[:gridheight%26])): #check if input is on the board
 		return False
 
 	return True
@@ -297,11 +297,11 @@ def convert_input_coordinates(user_input):
 	if len(input[1]) == 1:
 		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1])
 	else:
-		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1][0]) + len(map)//27*26
+		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1][0]) + len(grid)//27*26
 	if len(input[0]) == 1:
 		j = "abcdefghijklmnopqrstuvwxyz".index(input[0])
 	else:
-		j = "abcdefghijklmnopqrstuvwxyz".index(input[0][0]) + len(map[0])//27*26
+		j = "abcdefghijklmnopqrstuvwxyz".index(input[0][0]) + len(grid[0])//27*26
 	return i, j
 
 
@@ -396,7 +396,7 @@ def row_clear(grid, i):
 		if grid[0][b] == 2:
 			grid[0][b] = 1
 
-	#refresh the display of the map so that it shows that the blocks have fallen
+	#refresh the display of the grid so that it shows that the blocks have fallen
 	print_grid(grid)
 	sys.stdout.flush()
 	print(f"\033[{len(grid) + 3}B", end='')
@@ -427,7 +427,7 @@ def reset_full_lines_columns(grid, score):
 
 def main():
 	NB_BLOCKS_PER_PAGE = 10
-	universal_block_list = [ [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+	UNIVERSAL_BLOCK_LIST = [ [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
 	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
 	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0]], 
 	[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
@@ -480,9 +480,9 @@ def main():
 	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
 	[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
 	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0]] ]
-	circle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-	diamond_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 31, 32, 33, 34, 35, 20, 36, 37, 28, 38, 39, 40, 41]
-	triangle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+	CIRCLE_BLOCK_LIST = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+	DIAMOND_BLOCK_LIST = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 31, 32, 33, 34, 35, 20, 36, 37, 28, 38, 39, 40, 41]
+	TRIANGLE_BLOCK_LIST = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 
 	prompt = ">>> "
 	selected_block = None #variable containing the index of the block selected by the user out of the available_blocks list or None if no block is selected
@@ -495,26 +495,26 @@ def main():
 		score = 0
 		lives = 3
 		shape, size, policie = menu()
-		map = generate_grid(shape, size)
+		grid = generate_grid(shape, size)
 		if shape == "circle":
-			available_blocks = [universal_block_list[x] for x in circle_block_list]
+			available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in CIRCLE_BLOCK_LIST]
 		elif shape == "diamond":
-			available_blocks = [universal_block_list[x] for x in diamond_block_list]
+			available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in DIAMOND_BLOCK_LIST]
 		else:
-			available_blocks = [universal_block_list[x] for x in triangle_block_list]
+			available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in TRIANGLE_BLOCK_LIST]
 		if policie == "2":
 			available_blocks = random.choices(available_blocks, k=3)
 	else:
 		shape, random_blocks, score, lives = read_game_info(path_game_to_restore)
-		map = read_grid(path_game_to_restore)
+		grid = read_grid(path_game_to_restore)
 		if random_blocks == []:
 			policie = "1"
 			if shape == "circle":
-				available_blocks = [universal_block_list[x] for x in circle_block_list]
+				available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in CIRCLE_BLOCK_LIST]
 			elif shape == "diamond":
-				available_blocks = [universal_block_list[x] for x in diamond_block_list]
+				available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in DIAMOND_BLOCK_LIST]
 			else:
-				available_blocks = [universal_block_list[x] for x in triangle_block_list]
+				available_blocks = [UNIVERSAL_BLOCK_LIST[x] for x in TRIANGLE_BLOCK_LIST]
 		else:
 			policie = "2"
 			available_blocks = random_blocks
@@ -524,11 +524,11 @@ def main():
 	while game:
 		print("\033[2J", end='') #Clear the screen
 		
-		print_grid(map)
-		print(f"\033[{len(map[0])*2 + 4}C", end='')
+		print_grid(grid)
+		print(f"\033[{len(grid[0])*2 + 4}C", end='')
 		print_score_lives(score, lives)
 		print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
-		print(f"\033[{len(map) + 3}B", end='')
+		print(f"\033[{len(grid) + 3}B", end='') #Position the cursor at the line under the map
 
 		if lives == 0:
 			game = False
@@ -536,12 +536,13 @@ def main():
 
 		#Get user input
 		user_input = input(prompt)
-
 		if prompt != ">>> ":
 			prompt = ">>> "
 
+
 		if user_input == "q":
 			game = False
+
 		elif user_input == "save":
 			if policie == "1":
 				number_of_saves = 0
@@ -550,7 +551,7 @@ def main():
 						number_of_saves += 1
 				path = "#" + str(number_of_saves) + shape + "save.txt"
 				save_game_info(path, shape, [], score, lives)
-				save_grid(path, map)
+				save_grid(path, grid)
 			else:
 				number_of_saves = 0
 				for file in os.listdir():
@@ -558,35 +559,37 @@ def main():
 						number_of_saves += 1
 				path = "#" + str(number_of_saves) + shape + "save.txt"
 				save_game_info(path, shape, available_blocks, score, lives)
-				save_grid(path, map)
+				save_grid(path, grid)
 			prompt = "Game saved as " + path + " >>> "
+
 		elif user_input == "unselect":
 			selected_block = None
+
 		elif selected_block != None:
 			if user_input == "l":
 				available_blocks[selected_block] = rotate(available_blocks[selected_block], True)
 			elif user_input == "h":
 				available_blocks[selected_block] = rotate(available_blocks[selected_block], False)
 
-			elif is_input_coordinates(user_input, len(map[0]), len(map)):
+			elif is_input_coordinates(user_input, len(grid[0]), len(grid)):
 				#Transform the coordinates from string to numbers	
 				i, j = convert_input_coordinates(user_input)
 
-				if valid_position(map, available_blocks[selected_block], i, j):
-					emplace_block(map, available_blocks[selected_block], i, j)
-					#refresh the display of the map so that the user can see the blocks he placed appear
+				if valid_position(grid, available_blocks[selected_block], i, j):
+					emplace_block(grid, available_blocks[selected_block], i, j)
+					#refresh the display of the grid so that the user can see the blocks he placed appear
 					print("\033[100D\033[100A", end='')
-					print_grid(map)
+					print_grid(grid)
 					sys.stdout.flush()
-					print(f"\033[{len(map) + 3}B", end='')
-					score = reset_full_lines_columns(map, score)
+					print(f"\033[{len(grid) + 3}B", end='')
+					score = reset_full_lines_columns(grid, score)
 					if policie == "2":
 						if shape == "circle":
-							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in circle_block_list])
+							available_blocks[selected_block] = random.choice([UNIVERSAL_BLOCK_LIST[x] for x in CIRCLE_BLOCK_LIST])
 						elif shape == "diamond":
-							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in diamond_block_list])
+							available_blocks[selected_block] = random.choice([UNIVERSAL_BLOCK_LIST[x] for x in DIAMOND_BLOCK_LIST])
 						else:
-							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in triangle_block_list])
+							available_blocks[selected_block] = random.choice([UNIVERSAL_BLOCK_LIST[x] for x in TRIANGLE_BLOCK_LIST])
 					selected_block = None
 				else:
 					prompt = "Invalid position to place the block! You loose a life >>> "
@@ -600,7 +603,8 @@ def main():
 				page = page - 1
 		elif user_input == "l":
 			if page < (len(available_blocks)//NB_BLOCKS_PER_PAGE + (len(available_blocks)%NB_BLOCKS_PER_PAGE > 0)): #If the page number is inferior to the number of blocks divided by the nb of blocks per page th whole rounded up.
-				page = page + 1 
+				page = page + 1
+
 		else:
 			try:
 				user_input = int(user_input)
@@ -612,6 +616,8 @@ def main():
 					prompt = "Enter the coordinates to place the block (or type 'unselect' to unselect the block) >>> "
 				else:
 					prompt = "Enter a valid block number >>> "
+
+
 
 		print("\033[100D\033[100A", end='')
 
