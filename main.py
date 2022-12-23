@@ -53,9 +53,13 @@ def homescreen():
 			print("There are different boards with different shapes. You can choose the size and shape of the board, \
 then you can choose between two policies: either you can choose from all available blocks, \
 either you can choose from a set of three randomly chosen blocks")
-			print("To place a block, you must select it by typing in it's number, \
-then typing the coordinates where the bottom left cell of the block will be placed")
-			print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so.\
+			print("If you choose the first policie, you can naviguate between all the available blocks \
+by pressing 'l' to go to the next page of blocks or 'h' to go to the previous page of blocks")
+			print("To place a block, you must first select it by typing in it's number.")
+			print("You can then rotate the block using 'l' for clockwise and 'h' for counterclockwise.")
+			print("Once the block is in the correct rotation, place it by typing the coordinates \
+where the bottom left cell of the block will be placed")
+			print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so. \
 The game ends when you loose your three lives.")
 			print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
 			print("Have fun!")
