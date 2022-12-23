@@ -1,44 +1,60 @@
 from time import sleep
 import random
 import sys
+import os
 
-def display_rules():
-	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
-	print("\033[2J", end='')
-
-	print("PyTetris is a game where you have to place blocks to compleat rows and columns.")
-	print("There are different boards with different shapes. You can choose the size and shape of the board, \
-then you can choose between two policies: either you can choose from all available blocks, \
-either you can choose from a set of three randomly chosen blocks")
-	print("To place a block, you must select it by typing in it's number, \
-then typing the coordinates where the bottom left cell of the block will be placed")
-	print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so.\
-The game ends when you loose your three lives.")
-	print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
-	print("Have fun!")
-
-	user_input = input("Press 1 when you are ready to start playing")
-
-	while user_input != "1":
-		user_input = input("Press 1 when you are ready to start playing")
 
 
 def homescreen():
-	print("_|_|_|              _|_|_|_|_|            _|                _|\n\
+	start = False
+
+	while start == False:
+		path = False
+		print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+		print("\033[2J", end='') #Clear the screen
+		print("_|_|_|              _|_|_|_|_|            _|                _|\n\
 _|    _|  _|    _|      _|      _|_|    _|_|_|_|  _|  _|_|        _|_|_|\n\
 _|_|_|    _|    _|      _|    _|_|_|_|    _|      _|_|      _|  _|_|\n\
 _|        _|    _|      _|    _|          _|      _|        _|      _|_|\n\
 _|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
                 _|\n\
             _|_|\n\n\n")
-	user_input = input("Press 1 to start playing, 2 to display the rules")
+		user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules")
+		while not(user_input == "1" or user_input == "2" or user_input == "3"):
+			user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules")
+		
+		if user_input == "1":
+			start = True
+		elif user_input == "2": #Ask for the path to the file of the game to restore
+			print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+			print("\033[2J", end='') #Clear the screen
+			path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen")
+			while not(path == "q") and (len(path)<8 or not((path in os.listdir() and path[-8:] == "save.txt"))):
+				path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen")
+			if path != "q":
+				start = True
+		else: #display the rules
+			print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+			print("\033[2J", end='') #Clear the screen
 
-	while not(user_input == "1" or user_input == "2"):
-		user_input = input("Press 1 to start playing, 2 to display the rules")
-	if user_input == "2":
-		display_rules()
+			print("PyTetris is a game where you have to place blocks to compleat rows and columns.")
+			print("There are different boards with different shapes. You can choose the size and shape of the board, \
+		then you can choose between two policies: either you can choose from all available blocks, \
+		either you can choose from a set of three randomly chosen blocks")
+			print("To place a block, you must select it by typing in it's number, \
+		then typing the coordinates where the bottom left cell of the block will be placed")
+			print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so.\
+		The game ends when you loose your three lives.")
+			print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
+			print("Have fun!")
+
+			user_input = input("Press 'q' to go back to the homescreen")
+			while user_input != "q":
+				user_input = input("Press 'q' to go back to the homescreen")
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+	print("\033[2J", end='') #Clear the screen
+	return path
 
 def menu():
 	print("\033[2J", end='')
@@ -114,14 +130,52 @@ def generate_grid(shape, size):
 
 		return grid
 
+def read_game_info(path):
+	with open(path, 'r') as file:
+		lines = file.readlines()
+		shape = lines[0][:len(lines[0])-1]
+		if lines[1] == "\n":
+			random_blocks = []
+		else:
+			random_blocks = [ [[int(cell) for cell in line.split(',')] for line in block.split(':')] for block in lines[1][:len(lines[1])-1].split(';')]
+		score = int(lines[2][:len(lines[2])-1])
+		lives = int(lines[3][:len(lines[3])-1])
+	return shape, random_blocks, score, lives
+
 def read_grid(path):
 	""" Returns a map matrix of integers representing the content of the cell. The map file has return characters at the end of each line,
-	so i take each line without the last character (line[:len(line)-1]). This is why i added a return at the end of the diamond.txt file.
-	Otherwise, the last number will not be added."""
+	so i take each line without the last character (line[:len(line)-1])."""
 	
 	with open(path, 'r') as file:
-		map = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()]
-		return map
+		map = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()[4:]]
+	return map
+
+def save_game_info(path, shape, random_blocks, score, lives):
+	with open(path, 'w') as file:
+		file.write(shape + "\n")
+		for i in range(len(random_blocks)):
+			for j in range(len(random_blocks[i])):
+				for h in range(len(random_blocks[i][j])):
+					file.write(str(random_blocks[i][j][h]))
+					if h != len(random_blocks[i][j])-1:
+						file.write(",")
+				if j != len(random_blocks[i])-1:
+					file.write(":")
+			if i != len(random_blocks)-1:
+				file.write(";")
+		file.write("\n")
+
+		file.write(str(score) + "\n")
+		file.write(str(lives) + "\n")
+
+def save_grid(path, grid):
+	with open(path, 'a') as file:
+		for line in grid:
+			for i in range(len(line)):
+				file.write(str(line[i]))
+				if i != len(line)-1:
+					file.write(" ")
+			file.write("\n")
 
 def print_grid(grid):
 	print('   ', end='')
@@ -269,7 +323,7 @@ def emplace_block(grid, block, i, j):
 
 
 def row_flash(grid, i, first_square_of_line, last_square_of_line):
-	print(f"\033[{1+len(map)-i}A\033[{3+first_square_of_line*2}C", end='')
+	print(f"\033[{1+len(grid)-i}A\033[{3+first_square_of_line*2}C", end='')
 	for h in range(4): #4 is the number of times the row will flash.
 		if h%2 == 0:
 			print("\033[7m", end='')
@@ -345,7 +399,7 @@ def row_clear(grid, i):
 	#refresh the display of the map so that it shows that the blocks have fallen
 	print_grid(grid)
 	sys.stdout.flush()
-	print(f"\033[{len(map) + 3}B", end='')
+	print(f"\033[{len(grid) + 3}B", end='')
 
 	return nb_cleared_blocks
 
@@ -371,171 +425,200 @@ def reset_full_lines_columns(grid, score):
 	return score
 
 
-NB_BLOCKS_PER_PAGE = 10
-universal_block_list = [ [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0]],
-[[0,0,0,0,0], [0,2,2,0,0], [2,2,2,2,0], [2,2,2,2,0], [0,2,2,0,0]], 
-[[0,0,0,0,0], [2,0,0,2,0], [2,0,0,2,0], [2,0,0,2,0], [2,2,2,2,0]], 
-[[0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0], [0,0,0,2,0], [0,0,0,2,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0]], 
-[[2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [2,2,2,2,2], [2,0,0,0,2], [0,0,0,0,0], [2,2,2,2,2]], 
-[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,2], [2,2,2,2,2]], 
-[[0,0,0,0,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0], [2,0,0,0,0]],
-[[0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0], [0,0,0,2,0]], 
-[[0,0,0,0,0], [2,2,2,2,0], [0,2,2,0,0], [0,2,2,0,0], [0,2,2,0,0]], 
-[[0,0,0,0,0], [2,0,0,2,0], [0,2,2,0,0], [0,2,2,0,0], [2,0,0,2,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,2], [0,2,2,2,0], [0,0,2,0,0]], 
-[[0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0]], 
-[[0,0,0,0,0], [0,0,0,2,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,2,0], [2,2,2,2,0], [0,0,0,2,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0]], 
-[[0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,2,2,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [0,2,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [0,2,0,0,0], [0,0,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
-[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0]] ]
-circle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-diamond_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 31, 32, 33, 34, 35, 20, 36, 37, 28, 38, 39, 40, 41]
-triangle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+def main():
+	NB_BLOCKS_PER_PAGE = 10
+	universal_block_list = [ [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0], [2,2,2,2,0]],
+	[[0,0,0,0,0], [0,2,2,0,0], [2,2,2,2,0], [2,2,2,2,0], [0,2,2,0,0]], 
+	[[0,0,0,0,0], [2,0,0,2,0], [2,0,0,2,0], [2,0,0,2,0], [2,2,2,2,0]], 
+	[[0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0], [0,0,0,2,0], [0,0,0,2,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0], [0,0,2,0,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [2,2,2,2,0]], 
+	[[2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [2,2,2,2,2], [2,0,0,0,2], [0,0,0,0,0], [2,2,2,2,2]], 
+	[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,2], [2,2,2,2,2]], 
+	[[0,0,0,0,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0], [2,0,0,0,0]],
+	[[0,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0], [0,0,0,2,0]], 
+	[[0,0,0,0,0], [2,2,2,2,0], [0,2,2,0,0], [0,2,2,0,0], [0,2,2,0,0]], 
+	[[0,0,0,0,0], [2,0,0,2,0], [0,2,2,0,0], [0,2,2,0,0], [2,0,0,2,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,2], [0,2,2,2,0], [0,0,2,0,0]], 
+	[[0,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0], [0,2,2,0,0], [0,0,2,2,0]], 
+	[[0,0,0,0,0], [0,0,0,2,0], [0,0,2,2,0], [0,2,2,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,2,0], [2,2,2,2,0], [0,0,0,2,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,2,0], [0,0,0,2,0]], 
+	[[0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,2,2,0,0], [0,0,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0], [0,2,0,0,0], [0,2,2,2,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [2,2,2,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,2,2,0,0], [0,2,0,0,0], [2,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,2,0,0], [0,2,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [0,2,0,0,0], [0,0,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,2,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,0,0,0,0], [2,0,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,2,0,0,0], [2,2,2,0,0], [0,2,0,0,0]], 
+	[[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [2,2,0,0,0]] ]
+	circle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+	diamond_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 31, 32, 33, 34, 35, 20, 36, 37, 28, 38, 39, 40, 41]
+	triangle_block_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 
-prompt = ">>> "
-selected_block = None #variable containing the index of the block selected by the user out of the reandom_blocks list
-score = 0
-lives = 3
-page = 1 #this represents the blocks to be displayed from the blocks the user can choose from
-game = True #boolean representing whether the game is ongoing or not
-print("\033[?1049h", end='') #Enter alternative screen buffer (this is for instance what vim uses to create a new text editing window inside the terminal)
-print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
+	prompt = ">>> "
+	selected_block = None #variable containing the index of the block selected by the user out of the available_blocks list or None if no block is selected
+	page = 1 #this represents the blocks to be displayed from the blocks the user can choose from
+	game = True
+	print("\033[?1049h", end='') #Enter alternative screen buffer (this is for instance what vim uses to create a new text editing window inside the terminal)
 
-homescreen()
-shape, size, policie = menu()
-map = generate_grid(shape, size)
-if shape == "circle":
-		available_blocks = [universal_block_list[x] for x in circle_block_list]
-elif shape == "diamond":
-	available_blocks = [universal_block_list[x] for x in diamond_block_list]
-else:
-	available_blocks = [universal_block_list[x] for x in triangle_block_list]
-if policie == "2":
-	available_blocks = random.choices(available_blocks, k=3)
-
-while game:
-	print("\033[2J", end='') #Clear the screen
-	
-	print_grid(map)
-	print(f"\033[{len(map[0])*2 + 4}C", end='')
-	print_score_lives(score, lives)
-	print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
-	print(f"\033[{len(map) + 3}B", end='')
-
-	if lives == 0:
-		game = False
-		break
-
-	#Get user input
-	user_input = input(prompt)
-
-	if prompt != ">>> ":
-		prompt = ">>> "
-
-	#Use user input
-		#We first check if the user entered a command
-		#Otherwise we check if he entered coordinates
-		#Otherwise we check if the user enter a number
-		#it's maybe better to put this whole thing in a function
-	if user_input == "q":
-		game = False
-	elif user_input == "pause":
-		prompt = "Game paused (type 'resume' to continue) >>> "
-		#put the game on pause
-	elif user_input == "save":
-		pass
-		#save the current state of the game in a file
-	elif user_input == "unselect":
-		selected_block = None
-	elif selected_block != None:
-		if user_input == "l":
-			available_blocks[selected_block] = rotate(available_blocks[selected_block], True)
-		elif user_input == "h":
-			available_blocks[selected_block] = rotate(available_blocks[selected_block], False)
-
-		elif is_input_coordinates(user_input, len(map[0]), len(map)):
-			#Transform the coordinates from string to numbers	
-			i, j = convert_input_coordinates(user_input)
-
-			if valid_position(map, available_blocks[selected_block], i, j):
-				emplace_block(map, available_blocks[selected_block], i, j)
-				#refresh the display of the map so that the user can see the blocks he placed appear
-				print("\033[100D\033[100A", end='')
-				print_grid(map)
-				sys.stdout.flush()
-				print(f"\033[{len(map) + 3}B", end='')
-				score = reset_full_lines_columns(map, score)
-				if policie == "2":
-					if shape == "circle":
-						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in circle_block_list])
-					elif shape == "diamond":
-						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in diamond_block_list])
-					else:
-						available_blocks[selected_block] = random.choice([universal_block_list[x] for x in triangle_block_list])
-				selected_block = None
-			else:
-				prompt = "Invalid position to place the block! You loose a life >>> "
-				lives -= 1
-				selected_block = None
+	path_game_to_restore = homescreen()
+	if path_game_to_restore == False:
+		score = 0
+		lives = 3
+		shape, size, policie = menu()
+		map = generate_grid(shape, size)
+		if shape == "circle":
+			available_blocks = [universal_block_list[x] for x in circle_block_list]
+		elif shape == "diamond":
+			available_blocks = [universal_block_list[x] for x in diamond_block_list]
 		else:
-			prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
-
-	elif user_input == "h":
-		if page > 1:
-			page = page - 1
-	elif user_input == "l":
-		if page < (len(available_blocks)//NB_BLOCKS_PER_PAGE + (len(available_blocks)%NB_BLOCKS_PER_PAGE > 0)): #If the page number is inferior to the number of blocks divided by the nb of blocks per page th whole rounded up.
-			page = page + 1 
+			available_blocks = [universal_block_list[x] for x in triangle_block_list]
+		if policie == "2":
+			available_blocks = random.choices(available_blocks, k=3)
 	else:
-		try:
-			user_input = int(user_input)
-		except ValueError:
-			prompt = "Enter the number of a block or a valid command >>> "
-		else:
-			if user_input > 0 and user_input <= len(available_blocks):
-				selected_block = user_input-1
-				prompt = "Enter the coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+		shape, random_blocks, score, lives = read_game_info(path_game_to_restore)
+		map = read_grid(path_game_to_restore)
+		if random_blocks == []:
+			policie = "1"
+			if shape == "circle":
+				available_blocks = [universal_block_list[x] for x in circle_block_list]
+			elif shape == "diamond":
+				available_blocks = [universal_block_list[x] for x in diamond_block_list]
 			else:
-				prompt = "Enter a valid block number >>> "
+				available_blocks = [universal_block_list[x] for x in triangle_block_list]
+		else:
+			policie = "2"
+			available_blocks = random_blocks
 
-	print("\033[100D\033[100A", end='')
 
-print("\033[?1049l") #Quit alternative screen buffer
-print("Your final score was:", score)
+
+	while game:
+		print("\033[2J", end='') #Clear the screen
+		
+		print_grid(map)
+		print(f"\033[{len(map[0])*2 + 4}C", end='')
+		print_score_lives(score, lives)
+		print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
+		print(f"\033[{len(map) + 3}B", end='')
+
+		if lives == 0:
+			game = False
+			break
+
+		#Get user input
+		user_input = input(prompt)
+
+		if prompt != ">>> ":
+			prompt = ">>> "
+
+		if user_input == "q":
+			game = False
+		elif user_input == "save":
+			if policie == "1":
+				number_of_saves = 0
+				for file in os.listdir():
+					if len(file)>=8 and file[-8:] == "save.txt":
+						number_of_saves += 1
+				path = "#" + str(number_of_saves) + shape + "save.txt"
+				save_game_info(path, shape, [], score, lives)
+				save_grid(path, map)
+			else:
+				number_of_saves = 0
+				for file in os.listdir():
+					if len(file)>=8 and file[-8:] == "save.txt":
+						number_of_saves += 1
+				path = "#" + str(number_of_saves) + shape + "save.txt"
+				save_game_info(path, shape, available_blocks, score, lives)
+				save_grid(path, map)
+			prompt = "Game saved as " + path + " >>> "
+		elif user_input == "unselect":
+			selected_block = None
+		elif selected_block != None:
+			if user_input == "l":
+				available_blocks[selected_block] = rotate(available_blocks[selected_block], True)
+			elif user_input == "h":
+				available_blocks[selected_block] = rotate(available_blocks[selected_block], False)
+
+			elif is_input_coordinates(user_input, len(map[0]), len(map)):
+				#Transform the coordinates from string to numbers	
+				i, j = convert_input_coordinates(user_input)
+
+				if valid_position(map, available_blocks[selected_block], i, j):
+					emplace_block(map, available_blocks[selected_block], i, j)
+					#refresh the display of the map so that the user can see the blocks he placed appear
+					print("\033[100D\033[100A", end='')
+					print_grid(map)
+					sys.stdout.flush()
+					print(f"\033[{len(map) + 3}B", end='')
+					score = reset_full_lines_columns(map, score)
+					if policie == "2":
+						if shape == "circle":
+							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in circle_block_list])
+						elif shape == "diamond":
+							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in diamond_block_list])
+						else:
+							available_blocks[selected_block] = random.choice([universal_block_list[x] for x in triangle_block_list])
+					selected_block = None
+				else:
+					prompt = "Invalid position to place the block! You loose a life >>> "
+					lives -= 1
+					selected_block = None
+			else:
+				prompt = "Enter coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+
+		elif user_input == "h":
+			if page > 1:
+				page = page - 1
+		elif user_input == "l":
+			if page < (len(available_blocks)//NB_BLOCKS_PER_PAGE + (len(available_blocks)%NB_BLOCKS_PER_PAGE > 0)): #If the page number is inferior to the number of blocks divided by the nb of blocks per page th whole rounded up.
+				page = page + 1 
+		else:
+			try:
+				user_input = int(user_input)
+			except ValueError:
+				prompt = "Enter the number of a block or a valid command >>> "
+			else:
+				if user_input > 0 and user_input <= len(available_blocks):
+					selected_block = user_input-1
+					prompt = "Enter the coordinates to place the block (or type 'unselect' to unselect the block) >>> "
+				else:
+					prompt = "Enter a valid block number >>> "
+
+		print("\033[100D\033[100A", end='')
+
+	print("\033[?1049l") #Quit alternative screen buffer
+	print("Your final score was:", score)
+
+
+
+if __name__ == "__main__":
+	main()
