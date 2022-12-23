@@ -12,45 +12,58 @@ def homescreen():
 		path = False
 		print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 		print("\033[2J", end='') #Clear the screen
-		print("_|_|_|              _|_|_|_|_|            _|                _|\n\
-_|    _|  _|    _|      _|      _|_|    _|_|_|_|  _|  _|_|        _|_|_|\n\
-_|_|_|    _|    _|      _|    _|_|_|_|    _|      _|_|      _|  _|_|\n\
-_|        _|    _|      _|    _|          _|      _|        _|      _|_|\n\
-_|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
-                _|\n\
-            _|_|\n\n\n")
-		user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules")
+		print(" __        __   _                            _          ____       _____    _        _     _\n\
+ \\ \\      / /__| | ___ ___  _ __ ___   ___  | |_ ___   |  _ \\ _   |_   _|__| |_ _ __(_)___| |\n\
+  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | |_) | | | || |/ _ \\ __| '__| / __| |\n\
+   \\ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) | |  __/| |_| || |  __/ |_| |  | \\__ \\_|\n\
+    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/  |_|    \\__, ||_|\\___|\\__|_|  |_|___(_)\n\
+                                                              |___/\n\n\n")
+		user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules >>> ")
 		while not(user_input == "1" or user_input == "2" or user_input == "3"):
-			user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules")
+			print("\033[100D\033[A\033[2K", end='')
+			user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules >>> ")
 		
 		if user_input == "1":
 			start = True
 		elif user_input == "2": #Ask for the path to the file of the game to restore
 			print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 			print("\033[2J", end='') #Clear the screen
-			path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen")
+			print("  ____           _                                                 __\n\
+ |  _ \\ ___  ___| |_ ___  _ __ ___    __ _  __ _ _ __ ___   ___   / _|_ __ ___  _ __ ___    ___  __ ___   _____ \n\
+ | |_) / _ \\/ __| __/ _ \\| '__/ _ \\  / _` |/ _` | '_ ` _ \\ / _ \\ | |_| '__/ _ \\| '_ ` _ \\  / __|/ _` \\ \\ / / _ \\\n\
+ |  _ <  __/\\__ \\ || (_) | | |  __/ | (_| | (_| | | | | | |  __/ |  _| | | (_) | | | | | | \\__ \\ (_| |\\ V /  __/\n\
+ |_| \\_\\___||___/\\__\\___/|_|  \\___|  \\__, |\\__,_|_| |_| |_|\\___| |_| |_|  \\___/|_| |_| |_| |___/\\__,_| \\_/ \\___|\n\
+                                     |___/\n\n\n")
+			path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen >>> ")
 			while not(path == "q") and (len(path)<8 or not((path in os.listdir() and path[-8:] == "save.txt"))):
-				path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen")
+				print("\033[100D\033[A\033[2K", end='')
+				path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen >>> ")
 			if path != "q":
 				start = True
 		else: #display the rules
 			print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 			print("\033[2J", end='') #Clear the screen
 
+			print(" ____        _\n\
+|  _ \\ _   _| | ___  ___ \n\
+| |_) | | | | |/ _ \\/ __|\n\
+|  _ <| |_| | |  __/\\__ \\\n\
+|_| \\_\\__,__|_|\\___||___/\n\n\n")
 			print("PyTetris is a game where you have to place blocks to compleat rows and columns.")
 			print("There are different boards with different shapes. You can choose the size and shape of the board, \
-		then you can choose between two policies: either you can choose from all available blocks, \
-		either you can choose from a set of three randomly chosen blocks")
+then you can choose between two policies: either you can choose from all available blocks, \
+either you can choose from a set of three randomly chosen blocks")
 			print("To place a block, you must select it by typing in it's number, \
-		then typing the coordinates where the bottom left cell of the block will be placed")
+then typing the coordinates where the bottom left cell of the block will be placed")
 			print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so.\
-		The game ends when you loose your three lives.")
+The game ends when you loose your three lives.")
 			print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
 			print("Have fun!")
 
-			user_input = input("Press 'q' to go back to the homescreen")
+			user_input = input("Press 'q' to go back to the homescreen >>> ")
 			while user_input != "q":
-				user_input = input("Press 'q' to go back to the homescreen")
+				print("\033[100D\033[A\033[2K", end='')
+				user_input = input("Press 'q' to go back to the homescreen >>> ")
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 	print("\033[2J", end='') #Clear the screen
@@ -58,22 +71,36 @@ _|          _|_|_|      _|      _|_|_|      _|_|  _|        _|  _|_|_|\n\
 
 def menu():
 	print("\033[2J", end='')
+	print("  ____       _\n\
+ / ___|  ___| |_ _   _ _ __\n\
+ \\___ \\ / _ \\ __| | | | '_ \\ \n\
+  ___) |  __/ |_| |_| | |_) |\n\
+ |____/ \\___|\\__|\\__,_| .__/ \n\
+                      |_|\n\n\n")
 
-	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid")
+	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid >>> ")
 	while not(shape == "diamond" or shape == "circle" or shape == "triangle"):
-		shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid")
+		print("\033[100D\033[A\033[2K", end='')
+		shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid >>> ")
 
-	size = 0
+	size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids >>> ")
+	try:
+		size = int(size)
+	except ValueError:
+		pass
 	while type(size) == str or size < 1 or size%2 == 0:
-		size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids")
+		print("\033[100D\033[A\033[2K", end='')
+		size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids >>> ")
 		try:
 			size = int(size)
 		except ValueError:
-			print("The width is a number")
+			pass
 
-	policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks. Enter '1' to have access to all blocks, '2' for randomly chosen blocks")
+	policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks.\nEnter '1' to have access to all blocks, '2' for randomly chosen blocks >>> ")
 	while not(policie == "1" or policie == "2"):
-		policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks. Enter '1' to have access to all blocks, '2' for randomly chosen blocks")
+		print("\033[100D\033[A\033[2K", end='')
+		print("\033[A\033[2K", end='')
+		policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks.\nEnter '1' to have access to all blocks, '2' for randomly chosen blocks >>> ")
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 	return shape, size, policie
@@ -292,16 +319,16 @@ def is_input_coordinates(user_input, gridwidth, gridheight):
 
 	return True
 
-def convert_input_coordinates(user_input):
+def convert_input_coordinates(user_input, gridheight, gridwidth):
 	input = user_input.split(',')
 	if len(input[1]) == 1:
 		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1])
 	else:
-		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1][0]) + len(grid)//27*26
+		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1][0]) + gridheight//27*26
 	if len(input[0]) == 1:
 		j = "abcdefghijklmnopqrstuvwxyz".index(input[0])
 	else:
-		j = "abcdefghijklmnopqrstuvwxyz".index(input[0][0]) + len(grid[0])//27*26
+		j = "abcdefghijklmnopqrstuvwxyz".index(input[0][0]) + gridwidth//27*26
 	return i, j
 
 
@@ -323,7 +350,7 @@ def emplace_block(grid, block, i, j):
 
 
 def row_flash(grid, i, first_square_of_line, last_square_of_line):
-	print(f"\033[{1+len(grid)-i}A\033[{3+first_square_of_line*2}C", end='')
+	print(f"\033[{2+i}B\033[{3+first_square_of_line*2}C", end='') #position the cursor at first_square_of_line
 	for h in range(4): #4 is the number of times the row will flash.
 		if h%2 == 0:
 			print("\033[7m", end='')
@@ -337,7 +364,7 @@ def row_flash(grid, i, first_square_of_line, last_square_of_line):
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def col_flash(grid, j):
-	print(f"\033[{1+len(grid)}A\033[{3+j*2}C", end='')
+	print(f"\033[2B\033[{3+j*2}C", end='')
 	for h in range(4): #4 is the number of times the column will flash
 		if h%2 == 0:
 			print("\033[7m", end='')
@@ -353,7 +380,7 @@ def col_flash(grid, j):
 		sys.stdout.flush()
 		sleep(0.5)
 		print(f"\033[{len(grid)}A", end='')
-	print("\033[100D\033[100B", end='')
+	print("\033[100D\033[100A", end='')
 
 def row_state(grid, i):
 	for cell in grid[i]:
@@ -399,7 +426,6 @@ def row_clear(grid, i):
 	#refresh the display of the grid so that it shows that the blocks have fallen
 	print_grid(grid)
 	sys.stdout.flush()
-	print(f"\033[{len(grid) + 3}B", end='')
 
 	return nb_cleared_blocks
 
@@ -528,16 +554,17 @@ def main():
 		print(f"\033[{len(grid[0])*2 + 4}C", end='')
 		print_score_lives(score, lives)
 		print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
-		print(f"\033[{len(grid) + 3}B", end='') #Position the cursor at the line under the map
 
 		if lives == 0:
 			game = False
 			break
 
 		#Get user input
+		print("\033[100B\033[A", end='') #position the cursor at the line on top of the bottom line of the terminal
 		user_input = input(prompt)
 		if prompt != ">>> ":
 			prompt = ">>> "
+		print("\033[100D\033[100A", end='')
 
 
 		if user_input == "q":
@@ -573,15 +600,13 @@ def main():
 
 			elif is_input_coordinates(user_input, len(grid[0]), len(grid)):
 				#Transform the coordinates from string to numbers	
-				i, j = convert_input_coordinates(user_input)
+				i, j = convert_input_coordinates(user_input, len(grid), len(grid[0]))
 
 				if valid_position(grid, available_blocks[selected_block], i, j):
 					emplace_block(grid, available_blocks[selected_block], i, j)
 					#refresh the display of the grid so that the user can see the blocks he placed appear
-					print("\033[100D\033[100A", end='')
 					print_grid(grid)
 					sys.stdout.flush()
-					print(f"\033[{len(grid) + 3}B", end='')
 					score = reset_full_lines_columns(grid, score)
 					if policie == "2":
 						if shape == "circle":
