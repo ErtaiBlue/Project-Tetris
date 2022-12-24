@@ -1,3 +1,11 @@
+"""
+Name of the project: PyTetris
+Authors: BOU FERRAA Karel & BARANGER Amandine L1 INT Group 3
+This file holds all the code needed to run the program
+"""
+
+
+
 from time import sleep
 import random
 import sys
