@@ -6,6 +6,12 @@ import os
 
 
 def homescreen():
+	"""Displays the homescreen and presents a choice to the user.
+	He can type 1 to start the game immediately, 2 to restore a saved game and 3 to display the rules.
+	Returns 'path', string representing the path to the file of the game to restore.
+	If the user did not choose to restore a game from a save, path is equal to False.
+	"""
+
 	start = False
 
 	while start == False:
@@ -20,7 +26,7 @@ def homescreen():
                                                               |___/\n\n\n")
 		user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules >>> ")
 		while not(user_input == "1" or user_input == "2" or user_input == "3"):
-			print("\033[100D\033[A\033[2K", end='')
+			print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 			user_input = input("Press 1 to start playing, 2 to play from a saved game and 3 to display the rules >>> ")
 		
 		if user_input == "1":
@@ -35,8 +41,8 @@ def homescreen():
  |_| \\_\\___||___/\\__\\___/|_|  \\___|  \\__, |\\__,_|_| |_| |_|\\___| |_| |_|  \\___/|_| |_| |_| |___/\\__,_| \\_/ \\___|\n\
                                      |___/\n\n\n")
 			path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen >>> ")
-			while not(path == "q") and (len(path)<8 or not((path in os.listdir() and path[-8:] == "save.txt"))):
-				print("\033[100D\033[A\033[2K", end='')
+			while not(path == "q") and (len(path)<8 or not((path in os.listdir() and path[-8:] == "save.txt"))): #We secure the input by checking if the end of the input is 'save.txt' as all saves are named this way.
+				print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 				path = input("Enter the name of the file containing the saved game or 'q' to go back to homescreen >>> ")
 			if path != "q":
 				start = True
@@ -65,13 +71,13 @@ to place a block on column 27 and row 1 for example type: 'aa,A'")
 			print("Don't place a block on an already occupied cell or outside the board! You would loose a life if you do so. \
 The game ends when you loose your three lives.")
 			print("Every time you clear a row or column, your score will be incremented by the amount of blocks cleared.")
-			print("You can save a game state by typing 'save' . Then, if you want to come back to this game state, quit the game, relaunch it \
+			print("You can save a game state by typing 'save'. Then, if you want to come back to this game state, quit the game, relaunch it \
 and choose '2' in the homescreen. Then type in the name of the file containing the save.")
 			print("Have fun!. Once you have finished, you can exit by typing: 'q'")
 
 			user_input = input("Press 'q' to go back to the homescreen >>> ")
 			while user_input != "q":
-				print("\033[100D\033[A\033[2K", end='')
+				print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 				user_input = input("Press 'q' to go back to the homescreen >>> ")
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
@@ -79,7 +85,15 @@ and choose '2' in the homescreen. Then type in the name of the file containing t
 	return path
 
 def menu():
-	print("\033[2J", end='')
+	"""
+	Displays a menu where the user is prompted to setup their game.
+	Returns shape, size, policie.
+	shape a string representing the shape of the grid, either diamond, circle or triangle.
+	size and int representing the width of the grid.
+	policie a string, "1" for access to all blocks, "2" for randomly chosen blocks.
+	"""
+
+	print("\033[2J", end='') #Clear the screen
 	print("  ____       _\n\
  / ___|  ___| |_ _   _ _ __\n\
  \\___ \\ / _ \\ __| | | | '_ \\ \n\
@@ -89,7 +103,7 @@ def menu():
 
 	shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid >>> ")
 	while not(shape == "diamond" or shape == "circle" or shape == "triangle"):
-		print("\033[100D\033[A\033[2K", end='')
+		print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 		shape = input("Choose the shape of the grid. Enter 'diamond', 'circle' or 'triangle' to choose between the diamond, circle and triangle grid >>> ")
 
 	size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids >>> ")
@@ -98,7 +112,7 @@ def menu():
 	except ValueError:
 		pass
 	while type(size) == str or size < 1 or size%2 == 0:
-		print("\033[100D\033[A\033[2K", end='')
+		print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 		size = input("Choose the width of the grid. The width must be an odd number so as to preserve the symetry of the grids >>> ")
 		try:
 			size = int(size)
@@ -107,7 +121,7 @@ def menu():
 
 	policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks.\nEnter '1' to have access to all blocks, '2' for randomly chosen blocks >>> ")
 	while not(policie == "1" or policie == "2"):
-		print("\033[100D\033[A\033[2K", end='')
+		print("\033[100D\033[A\033[2K", end='') #Goes up a line and clears the line
 		print("\033[A\033[2K", end='')
 		policie = input("Choose whether you have access to all blocks in the game each turn or only a set of randomly selected blocks.\nEnter '1' to have access to all blocks, '2' for randomly chosen blocks >>> ")
 
@@ -115,6 +129,11 @@ def menu():
 	return shape, size, policie
 
 def generate_grid(shape, size):
+	"""
+	Generates a grid of given shape and size
+	Returns grid a 2D matrix.
+	"""
+
 	if shape == "diamond":
 		grid = [[] for x in range(size)]
 		for i in range(0, size//2):
@@ -167,6 +186,16 @@ def generate_grid(shape, size):
 		return grid
 
 def read_game_info(path):
+	"""
+	Reads the first four lines of a save file.
+	In the first line is written the shape of the grid.
+	In the second line is written the random blocks that were available to the user. This line is empty if the policie was "1", that is the user had access to all blocks
+	In the third line is written the score
+	In the fourth line is written the lives
+	All the lines end with a \n, this is why we don't take the last character of a line [:len(lines[0])-1])
+	Returns shape a string, random_blocks a list (empty if the second line was empty), score an int and lives an int.
+	"""
+
 	with open(path, 'r') as file:
 		lines = file.readlines()
 		shape = lines[0][:len(lines[0])-1]
@@ -179,14 +208,26 @@ def read_game_info(path):
 	return shape, random_blocks, score, lives
 
 def read_grid(path):
-	""" Returns a grid matrix of integers representing the content of the cell. The grid file has return characters at the end of each line,
-	so i take each line without the last character (line[:len(line)-1])."""
+	"""
+	Reads all the lines of a save file starting from the 5th line. This is were the grid matrix is written.
+	All the lines end with a \n, this is why we don't take the last character of a line: line[:len(line)-1]
+	Returns grid a 2D matrix.
+	"""
 	
 	with open(path, 'r') as file:
 		grid = [[int(x) for x in line[:len(line)-1].split(' ')] for line in file.readlines()[4:]]
 	return grid
 
 def save_game_info(path, shape, random_blocks, score, lives):
+	"""
+	Writes the game information in the file specified by path.
+	In the first line is written the shape of the grid.
+	In the second line is written the random blocks that were available to the user. This line is empty if the policie was "1", that is the user had access to all blocks
+	The block matrixes are written like so: values of cells are separated by a comma, lines are separated by : the blocks are separated by ;
+	In the third line is written the score
+	In the fourth line is written the lives
+	"""
+
 	with open(path, 'w') as file:
 		file.write(shape + "\n")
 		for i in range(len(random_blocks)):
@@ -205,6 +246,11 @@ def save_game_info(path, shape, random_blocks, score, lives):
 		file.write(str(lives) + "\n")
 
 def save_grid(path, grid):
+	"""
+	Writes the grid at the end of the file specified by path.
+	Values are separated by a space. Each row of the grid is written on a line.
+	"""
+
 	with open(path, 'a') as file:
 		for line in grid:
 			for i in range(len(line)):
@@ -214,12 +260,16 @@ def save_grid(path, grid):
 			file.write("\n")
 
 def print_grid(grid):
+	"""
+	Displays the grid on the screen.
+	Once done, positions the cursor at the top left of the screen
+	"""
+
 	print('   ', end='')
 	for i in range(len(grid[0])):
 		print("abcdefghijklmnopqrstuvwxyz"[i%26] + ' ', end='')
 	print("\n", end='')
 
-	#print the grid
 	print(' ', end='')
 	for i in range(len(grid[0]) + 2):
 		print('- ', end='')
@@ -245,6 +295,11 @@ def print_grid(grid):
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def print_score_lives(score, lives):
+	"""
+	Displays the score and the lives on the screen.
+	Once done, positions the cursor 3 lines below the score
+	"""
+
 	#print the score
 	print(" " * 5, end='')
 	print("#" * (9+len(str(score))+2), end=f"\033[{9+len(str(score))+2}D\033[B")
@@ -256,10 +311,16 @@ def print_score_lives(score, lives):
 	print("#" * (9+3+2), end=f"\033[{9+3+2}D\033[B")
 	print("# Lives: ", "❤"*lives, " "*(3-lives), " #", sep='', end=f"\033[{9+3+2}D\033[B")
 	print("#" * (9+3+2), end='')
-	print(f"\033[{9+len(str(score))+2+5+9+3+2}D\033[3B", end='') #reposition the cursor
+	print(f"\033[{9+len(str(score))+2+5+9+3+2}D\033[3B", end='') #reposition the cursor 3 lines below the score
 
 def print_blocks(blocks, page, NB_BLOCKS_PER_PAGE, selected_block):
-	#print the blocks to be chosen from
+	"""
+	Displays the blocks that the user can choose from. The parameter blocks contains a list of all blocks to be displayed
+	The parameters page and NB_BLOCKS_PER_PAGE are used to write the correct number underneath each block.
+	The blocks are displayed in lines of 5 blocks
+	The selected block is displayed in red
+	Once done, cursor is reset to the top left corner of the screen
+	"""
 
 	for i in range(len(blocks)):
 		if selected_block != None and i+1+(page-1)*NB_BLOCKS_PER_PAGE == selected_block+1:
@@ -283,33 +344,41 @@ def print_blocks(blocks, page, NB_BLOCKS_PER_PAGE, selected_block):
 		print('-' * (len(blocks[i][0])+2), end=f"\033[{len(blocks[i][0])+2}D\033[B")		
 		print("\033[38;2;255;255;255m", end='')
 
-		if i%5 == 0:
+		if i%5 == 0: #The 5 is the number of blocks per line
 			print("\0337", end='') #saves cursor position (might not work on terminals other than xterm)
 
 		#be carefull even or odd number of len of block[0]and behaviour of //
 		print(' ' * ((len(blocks[i][0]))//2), i+1+(page-1)*NB_BLOCKS_PER_PAGE, end=f"\033[{(len(blocks[i][0])+2)//2 +1}D")
 
-		if (i+1)%5 == 0:
-			print("\0338\033[3B", end='') #Restores cursor position and moves it three lines down.
+		if (i+1)%5 == 0: #The 5 is the number of blocks per line
+			print("\0338\033[3B", end='') #Restores cursor position (might not work on terminals other than xterm) and moves it three lines down.
 		else:
 			print(f"\033[{len(blocks[i]) + 2}A\033[{len(blocks[i][0])+2}C", end='     ')
 
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def rotate(block, dir):
-    #clockwise if dir = True
-    rotated_block = []
+	"""
+	Returns a matrix which corresponds to the block passed in parameter rotated clockwise if dir == True and counterclockwise if dir == False
+	"""
+	
+	rotated_block = []
+	
+	if dir == True:
+		for i in range(len(block[0])):
+			rotated_block.append([block[j][i] for j in range(len(block)-1, -1, -1)])
+	else:
+		for i in range(len(block[0])-1, -1, -1):
+			rotated_block.append([line[i] for line in block])
 
-    if dir == True:
-        for i in range(len(block[0])):
-            rotated_block.append([block[j][i] for j in range(len(block)-1, -1, -1)])
-    else:
-        for i in range(len(block[0])-1, -1, -1):
-            rotated_block.append([line[i] for line in block])
-
-    return rotated_block
+	return rotated_block
 
 def is_input_coordinates(user_input, gridwidth, gridheight):
+	"""
+	Checks if the string user_input is of the format of coordinates that is [letter corresponding to column],[letter corresponding to row]
+	Returns True if yes, False if no.
+	"""
+
 	input = user_input.split(',')
 	columns = "abcdefghijklmnopqrstuvwxyz"
 	rows = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -329,6 +398,11 @@ def is_input_coordinates(user_input, gridwidth, gridheight):
 	return True
 
 def convert_input_coordinates(user_input, gridheight, gridwidth):
+	"""
+	Converts the string user_input to two integer coordinates i, j the indexes of the row and column corresponding to the letters the user entered
+	We have to keep in mind that the user first enters the letter of the column, then the letter of the row.
+	"""
+
 	input = user_input.split(',')
 	if len(input[1]) == 1:
 		i = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(input[1])
@@ -342,6 +416,12 @@ def convert_input_coordinates(user_input, gridheight, gridwidth):
 
 
 def valid_position(grid, block, i, j):
+	"""
+	Checks if the coordinates i,j are a valid position to place the block passed in parameter.
+	We have to check that the block would not be placed out of bounds or placed on top of an invalid cell or already occupied cell.
+	Returns True if the coordinates i,j are a valid position for the block, False if not.
+	"""
+
 	for a in range(len(block)):
 		for b in range(len(block[0])):
 			if block[a][b] == 2:
@@ -352,6 +432,10 @@ def valid_position(grid, block, i, j):
 	return True
 
 def emplace_block(grid, block, i, j):
+	"""
+	Modifies the grid to place the block at the coordinates i,j
+	"""
+
 	for a in range(len(block)):
 		for b in range(len(block[0])):
 			if block[a][b] == 2:
@@ -359,12 +443,18 @@ def emplace_block(grid, block, i, j):
 
 
 def row_flash(grid, i, first_square_of_line, last_square_of_line):
+	"""
+	Makes the blocks in the row i flash starting from the first_square_line and ending a last_square_of_line
+	To make the row flash, we display the row a few times switching from inverted colors to normal colors with a little delay.
+	Once done, the cursor is reset to the top left corner of the screen
+	"""
+
 	print(f"\033[{2+i}B\033[{3+first_square_of_line*2}C", end='') #position the cursor at first_square_of_line
-	for h in range(4): #4 is the number of times the row will flash.
+	for h in range(4): #4 is the number of times the row will flash. It has to be even or else the terminal would stay in inverse video mode.
 		if h%2 == 0:
-			print("\033[7m", end='')
+			print("\033[7m", end='') #Makes the terminal go in reverse video mode, everything printed in this mode has its colors inverted.
 		else:
-			print("\033[0m", end='')
+			print("\033[0m", end='') #Resets the terminal mode to normal
 		for j in range(first_square_of_line, last_square_of_line+1):
 			print('▩', end="\033[C")
 		print(f"\033[{(last_square_of_line+1-first_square_of_line)*2}D", end='')
@@ -373,12 +463,18 @@ def row_flash(grid, i, first_square_of_line, last_square_of_line):
 	print("\033[100D\033[100A", end='') #Position the cursor in top left corner of screen
 
 def col_flash(grid, j):
+	"""
+	Makes the blocks in the column j flash.
+	To make the row flash, we display the column a few times switching from inverted colors to normal colors with a little delay.
+	Once done, the cursor is reset to the top left corner of the screen
+	"""
+
 	print(f"\033[2B\033[{3+j*2}C", end='')
-	for h in range(4): #4 is the number of times the column will flash
+	for h in range(4): #4 is the number of times the column will flash. It has to be even or else the terminal would stay in inverse video mode.
 		if h%2 == 0:
-			print("\033[7m", end='')
+			print("\033[7m", end='') #Makes the terminal go in reverse video mode, everything printed in this mode has its colors inverted.
 		else:
-			print("\033[0m", end='')
+			print("\033[0m", end='') #Resets the terminal mode to normal
 
 		for i in range(len(grid)):
 			if grid[i][j] == 2:
@@ -389,21 +485,40 @@ def col_flash(grid, j):
 		sys.stdout.flush()
 		sleep(0.5)
 		print(f"\033[{len(grid)}A", end='')
+
 	print("\033[100D\033[100A", end='')
 
 def row_state(grid, i):
+	"""
+	Checks if the row i is full and needs to be cleared.
+	Returns True if the row is full, False if not.
+	"""
+
 	for cell in grid[i]:
 		if cell == 1:
 			return False
 	return True
 
 def col_state(grid, j):
+	"""
+	Checks if the column j is full and needs to be cleared.
+	Returns True if the column is full, False if not.
+	"""
+
 	for line in grid:
 		if line[j] == 1:
 			return False
 	return True
 
 def row_clear(grid, i):
+	"""
+	Modifies the grid to clear the row i.
+	The row to be cleared is first flashed, then the row is cleared, 
+	then we make the blocks on top of the cleared blocks fall down and we refresh the display so the user can see the blocks fell.
+	Returns the number of cleared blocks. This is needed to increment the score accordingly.
+	"""
+
+	#find what is the index of the first square of the line and the last square of the line. This is needed to flash the right blocks, and make the correct blocks fall down
 	nb_cleared_blocks = 0
 	previous_cell = None
 	first_square_of_line = None
@@ -440,6 +555,12 @@ def row_clear(grid, i):
 
 
 def col_clear(grid, j):
+	"""
+	Modifies the grid to clear the column j.
+	The column to be cleared is first flashed, then the column is cleared.
+	Returns the number of cleared blocks. This is needed to increment the score accordingly.
+	"""
+
 	nb_cleared_blocks = 0
 	col_flash(grid, j)
 
@@ -451,6 +572,10 @@ def col_clear(grid, j):
 
 
 def reset_full_lines_columns(grid, score):
+	"""
+	Resets all full lines and columns in the grid and returns the new score.
+	"""
+
 	for i in range(len(grid)-1, -1, -1):
 		while row_state(grid, i):
 			score += row_clear(grid, i)
@@ -560,7 +685,7 @@ def main():
 		print("\033[2J", end='') #Clear the screen
 		
 		print_grid(grid)
-		print(f"\033[{len(grid[0])*2 + 4}C", end='')
+		print(f"\033[{len(grid[0])*2 + 4}C", end='') #Move the cursor to where the score should start being displayed
 		print_score_lives(score, lives)
 		print_blocks(available_blocks[(page-1)*NB_BLOCKS_PER_PAGE:page*NB_BLOCKS_PER_PAGE], page, NB_BLOCKS_PER_PAGE, selected_block)
 
@@ -569,11 +694,11 @@ def main():
 			break
 
 		#Get user input
-		print("\033[100B\033[A", end='') #position the cursor at the line on top of the bottom line of the terminal
+		print("\033[100B\033[A", end='') #position the cursor at the line above the bottom line of the terminal
 		user_input = input(prompt)
 		if prompt != ">>> ":
 			prompt = ">>> "
-		print("\033[100D\033[100A", end='')
+		print("\033[100D\033[100A", end='') #reset the position of the cursor to the top left of the terminal
 
 
 		if user_input == "q":
@@ -617,6 +742,7 @@ def main():
 					print_grid(grid)
 					sys.stdout.flush()
 					score = reset_full_lines_columns(grid, score)
+					#if the game mode is random blocks, replace the block the user just placed with a new randomly chosen block
 					if policie == "2":
 						if shape == "circle":
 							available_blocks[selected_block] = random.choice([UNIVERSAL_BLOCK_LIST[x] for x in CIRCLE_BLOCK_LIST])
